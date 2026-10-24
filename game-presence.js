@@ -9,6 +9,10 @@ void (async () => {
         window[LOCK].stop();
     }
 
+    let cancelledWhileLoading = false;
+    const loadingLock = { loading: true, stop: () => { cancelledWhileLoading = true; } };
+    window[LOCK] = loadingLock;
+
     let CATALOG = [
         ["SpeedRunners","259392830932254721"],
         ["Move or Die","343232907390746625"],
@@ -1866,7 +1870,10 @@ void (async () => {
         paused: false,
         minimized: false,
         corner: "bottom-right",
-        creditPlaytime: false
+        creditPlaytime: false,
+        batchHours: 1,
+        batchCount: 0,
+        batchChunk: 16
     };
     const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
     const settings = (() => {
@@ -1885,6 +1892,9 @@ void (async () => {
         s.paused = Boolean(s.paused);
         s.minimized = Boolean(s.minimized);
         s.creditPlaytime = Boolean(s.creditPlaytime);
+        s.batchHours = clamp(Number(s.batchHours) || DEFAULTS.batchHours, 0.1, 9999);
+        s.batchCount = Math.max(0, Math.floor(Number(s.batchCount) || 0));
+        s.batchChunk = clamp(Math.floor(Number(s.batchChunk)) || DEFAULTS.batchChunk, 1, 500);
         if (!CORNERS.includes(s.corner)) s.corner = DEFAULTS.corner;
         return s;
     })();
@@ -1932,10 +1942,18 @@ void (async () => {
 
     try {
         const remoteCatalogue = await fetchDetectableCatalogue();
-        CATALOG = remoteCatalogue;
-        console.info(`[Game Presence] Loaded ${CATALOG.length} detectable games from Discord.`);
+        const remoteIds = new Set(remoteCatalogue.map(([, id]) => id));
+        const embeddedOnly = CATALOG.filter(([, id]) => !remoteIds.has(id));
+        CATALOG = [...remoteCatalogue, ...embeddedOnly];
+        console.info(`[Game Presence] Loaded ${remoteCatalogue.length} detectable games from Discord (+${embeddedOnly.length} embedded).`);
     } catch (error) {
         console.warn("[Game Presence] Could not load Discord's catalogue; using embedded fallback.", error);
+    }
+
+    if (cancelledWhileLoading || window[LOCK] !== loadingLock) {
+        if (window[LOCK] === loadingLock) delete window[LOCK];
+        console.warn("[Game Presence] Startup cancelled.");
+        return;
     }
 
     function normalize(s) {
@@ -2363,6 +2381,67 @@ void (async () => {
         );
     }
 
+    const BATCH_DELAY_MS = 1000;
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    async function postScience(token, events, session) {
+        for (let attempt = 0; ; attempt++) {
+            let status = 0, retryAfter = 0;
+            try {
+                if (restAPI?.post) {
+                    await restAPI.post({ url: "/science", body: { token, events } });
+                    return;
+                }
+                const response = await discordFetch("/science", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: apiHeaders(session.superProperties),
+                    body: JSON.stringify({ token, events })
+                });
+                if (response.ok) return;
+                status = response.status;
+                retryAfter = Number((await response.json().catch(() => ({}))).retry_after);
+            } catch (error) {
+                status = error?.status ?? error?.statusCode ?? 0;
+                retryAfter = Number(error?.body?.retry_after);
+                if (status !== 429) throw error;
+            }
+            if (status !== 429 || attempt >= 5) {
+                throw Object.assign(new Error(`Discord returned ${status} during batch claim`), { status });
+            }
+            await sleep((retryAfter || 2) * 1000 + 250);
+        }
+    }
+
+    async function batchClaimAll(hours = 1, count = null, perRequest = 16, onProgress = null, signal = null) {
+        const token = await getAnalyticsToken();
+        const durationMs = Math.floor(Math.max(0.1, hours) * 3_600_000);
+        const games = (count ? CATALOG.slice(0, count) : CATALOG).map(buildGame);
+        const chunkSize = clamp(Math.floor(perRequest) || 16, 1, 500);
+        const session = clientSession();
+        let ok = 0;
+        for (let i = 0; i < games.length; i += chunkSize) {
+            if (signal?.cancelled) break;
+            const chunk = games.slice(i, i + chunkSize);
+            const now = Date.now();
+            const startedAt = Math.max(0, now - durationMs);
+            const events = [];
+            for (const game of chunk) {
+                const gameSession = crypto.randomUUID();
+                events.push(buildHeartbeat(game, 0, gameSession, true, startedAt));
+                events.push(buildLaunch(game, fingerprintFor(game.id), startedAt));
+                events.push(buildHeartbeat(game, durationMs, gameSession, false, now));
+            }
+            await postScience(token, events, session);
+            ok += chunk.length;
+            onProgress?.(ok, games.length);
+            console.info(`[Game Presence] Batch claim ${ok}/${games.length}`);
+            if (i + chunkSize < games.length) await sleep(BATCH_DELAY_MS);
+        }
+        console.info(`[Game Presence] Batch claim ${signal?.cancelled ? "stopped" : "done"}: ${ok} games × ${hours}h.`);
+        return ok;
+    }
+
     function setDebugGame(game) {
         dispatcher.dispatch({ type: "RUNNING_GAME_SET_DEBUG_GAME", game });
     }
@@ -2510,22 +2589,27 @@ void (async () => {
         console.log(`[Game Presence] Resting for ${settings.restMinutes}m before the next game.`);
     }
 
-    function go(step) {
+    function clearBreak() {
         clearTimeout(breakTimer);
         breakTimer = null;
         breakEndsAt = 0;
         isResting = false;
-        cursor = (cursor + step + order.length) % order.length;
+    }
+
+    function playAt(position) {
+        clearBreak();
+        cursor = (position + order.length) % order.length;
         activate();
         schedule();
     }
 
+    function go(step) {
+        playAt(cursor + step);
+    }
+
     function playIndex(catalogIndex) {
         const pos = order.indexOf(catalogIndex);
-        if (pos < 0) return;
-        cursor = pos;
-        activate();
-        schedule();
+        if (pos >= 0) playAt(pos);
     }
 
     function togglePause() {
@@ -2533,11 +2617,9 @@ void (async () => {
         save();
         if (settings.paused) {
             clearTimeout(switchTimer);
-            clearTimeout(breakTimer);
             switchTimer = null;
-            breakTimer = null;
             nextSwitchAt = 0;
-            breakEndsAt = 0;
+            clearBreak();
             ui.tick();
             ui.setPaused(true);
             return;
@@ -2551,7 +2633,7 @@ void (async () => {
         settings.maxMinutes = clamp(Math.round(max) || settings.minMinutes, settings.minMinutes, 1440);
         settings.restMinutes = clamp(Math.round(rest) || DEFAULTS.restMinutes, 1, 10);
         save();
-        schedule();
+        if (current || settings.paused) schedule();
     }
 
     function stop() {
@@ -2580,108 +2662,197 @@ void (async () => {
         host.style.cssText = "position:fixed;z-index:999999;";
         const shadow = host.attachShadow({ mode: "open" });
 
+        const ICON = {
+            pad: `<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59l-.9 7.79A2.5 2.5 0 0 0 4.29 19c.9 0 1.73-.48 2.17-1.27L7.5 16h9l1.04 1.73c.44.79 1.27 1.27 2.17 1.27a2.5 2.5 0 0 0 2.49-2.62l-.9-7.79A4 4 0 0 0 17.32 5z"/></svg>`,
+            search: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`,
+            gear: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+            min: `<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>`,
+            close: `<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
+            prev: `<svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>`,
+            next: `<svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>`,
+            play: `<svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>`,
+            pause: `<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>`,
+            shuffle: `<svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>`,
+            bolt: `<svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>`
+        };
+
         shadow.innerHTML = `
 <style>
-:host { --accent:#7d54d9; --accent-hi:#936ff0; --bg:rgba(18,19,24,.82);
-        --text:#f2f3f5; --muted:#949ba4; --soft:#b5bac1; --danger:#da373c; --ok:#23a55a; }
+:host { --accent:#8b5cf6; --accent-2:#6366f1; --accent-soft:rgba(139,92,246,.16);
+        --bg:#111214; --bg-2:#18191c; --bg-3:#232428; --line:rgba(255,255,255,.07);
+        --text:#f2f3f5; --muted:#8e9297; --soft:#c4c7cc; --danger:#ed4245; --ok:#3ba55d; --warn:#faa61a; }
 * { box-sizing:border-box; font-family:"gg sans","Noto Sans","Helvetica Neue",Arial,sans-serif; }
-button { font:inherit; border:0; cursor:pointer; }
-.panel { width:310px; padding:14px 16px; color:var(--text); background:var(--bg);
-         backdrop-filter:blur(14px); border:1px solid var(--accent); border-radius:14px;
-         box-shadow:0 12px 32px rgba(0,0,0,.45); user-select:none;
-         transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s; }
-.panel.pulse { transform:translateY(-3px); box-shadow:0 12px 32px rgba(125,84,217,.35), 0 0 18px rgba(125,84,217,.35); }
-.panel.dragging { transition:none; opacity:.85; }
-.mini { display:none; width:48px; height:48px; border-radius:50%; background:var(--bg);
-        border:1px solid var(--accent); font-size:20px; color:#fff; box-shadow:0 8px 20px rgba(0,0,0,.45); }
+button { font:inherit; border:0; cursor:pointer; color:inherit; background:none; padding:0; }
+svg { width:16px; height:16px; display:block; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+.panel { width:320px; padding:14px; color:var(--text);
+         background:linear-gradient(180deg,rgba(139,92,246,.10),transparent 140px),var(--bg);
+         border:1px solid var(--line); border-radius:16px; user-select:none;
+         box-shadow:0 20px 50px rgba(0,0,0,.55),inset 0 0 0 1px rgba(139,92,246,.16);
+         transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s; }
+.panel.pulse { transform:translateY(-2px); box-shadow:0 20px 50px rgba(0,0,0,.55),0 0 26px rgba(139,92,246,.32),inset 0 0 0 1px rgba(139,92,246,.35); }
+.panel.dragging { transition:none; opacity:.9; }
+.mini { display:none; width:48px; height:48px; border-radius:16px; color:#fff;
+        background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 10px 24px rgba(99,102,241,.45); }
+.mini svg { width:22px; height:22px; }
 :host(.minimized) .panel { display:none; }
 :host(.minimized) .mini { display:grid; place-items:center; }
 
-.head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; cursor:grab; }
-.badge { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:.6px;
-         text-transform:uppercase; color:var(--muted); }
-.dot { width:8px; height:8px; border-radius:50%; background:var(--ok); box-shadow:0 0 8px var(--ok);
+.head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; cursor:grab; }
+.badge { display:flex; align-items:center; gap:7px; padding:5px 10px 5px 9px; border-radius:999px;
+         background:var(--bg-2); border:1px solid var(--line);
+         font-size:10.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--soft); font-variant-numeric:tabular-nums; }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px rgba(59,165,93,.22);
        animation:blink 2s infinite ease-in-out; }
-.paused .dot { background:#f0b232; box-shadow:0 0 8px #f0b232; animation:none; }
-@keyframes blink { 50% { opacity:.4; } }
-.tools { display:flex; gap:4px; }
-.tool { background:rgba(255,255,255,.06); color:var(--soft); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; }
-.tool:hover { background:var(--accent); color:#fff; }
-.tool.close:hover { background:var(--danger); }
+.paused .dot { background:var(--warn); box-shadow:0 0 0 3px rgba(250,166,26,.22); animation:none; }
+@keyframes blink { 50% { opacity:.45; } }
+.tools { display:flex; gap:2px; }
+.tool { width:28px; height:28px; border-radius:8px; display:grid; place-items:center; color:var(--muted); transition:background .15s,color .15s; }
+.tool svg { width:15px; height:15px; }
+.tool:hover, .tool.on { background:var(--bg-3); color:var(--text); }
+.tool.on { color:var(--accent); }
+.tool.close:hover { background:rgba(237,66,69,.15); color:var(--danger); }
 
-.game { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.icon { width:40px; height:40px; flex-shrink:0; border-radius:10px; overflow:hidden; display:grid; place-items:center;
-        font-size:18px; background:linear-gradient(135deg,var(--accent),#5639a0); box-shadow:0 4px 10px rgba(125,84,217,.38); }
+.game { display:flex; align-items:center; gap:12px; padding:10px; margin-bottom:12px; border-radius:12px; background:var(--bg-2); border:1px solid var(--line); }
+.icon { width:48px; height:48px; flex-shrink:0; border-radius:12px; overflow:hidden; display:grid; place-items:center; color:#fff;
+        background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 6px 16px rgba(99,102,241,.35); }
+.icon svg { width:22px; height:22px; }
 .icon img { width:100%; height:100%; object-fit:cover; }
 .info { min-width:0; flex:1; }
-.title { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity .15s; }
-.sub { margin-top:2px; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.label { margin-bottom:3px; font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--accent); }
+.title { font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity .15s; }
+.sub { margin-top:3px; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
 
-.track { height:4px; border-radius:2px; overflow:hidden; background:rgba(255,255,255,.08); }
-.bar { height:100%; width:0; background:linear-gradient(90deg,var(--accent),#b18cff); transition:width 1s linear; }
+.track { height:4px; border-radius:999px; overflow:hidden; background:var(--bg-3); }
+.bar, .pbar { height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
+.bar { transition:width 1s linear; }
+.pbar { transition:width .3s ease; }
 
-.player { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:12px; }
-.pbtn { width:28px; height:28px; border-radius:50%; background:transparent; color:var(--soft); font-size:14px;
-        display:grid; place-items:center; transition:background .15s,color .15s,transform .15s; }
-.pbtn:hover { color:#fff; background:rgba(125,84,217,.28); transform:scale(1.08); }
-.pbtn.play { width:36px; height:36px; background:var(--accent); color:#fff; box-shadow:0 4px 12px rgba(125,84,217,.42); }
-.pbtn.play:hover { background:var(--accent-hi); }
+.player { display:flex; justify-content:center; align-items:center; gap:14px; margin-top:12px; }
+.pbtn { width:32px; height:32px; border-radius:50%; color:var(--soft); display:grid; place-items:center; transition:background .15s,color .15s,transform .15s; }
+.pbtn:hover { color:#fff; background:var(--bg-3); }
+.pbtn svg { width:15px; height:15px; fill:currentColor; stroke:none; }
+.pbtn.play { width:42px; height:42px; color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 8px 20px rgba(99,102,241,.4); }
+.pbtn.play:hover { transform:scale(1.06); background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
+.pbtn.play svg { width:17px; height:17px; }
 
-.drawer { display:none; margin-top:12px; padding:12px; border-radius:12px;
-          background:rgba(25,22,35,.7); border:1px solid rgba(125,84,217,.5); }
+.drawer { display:none; margin-top:14px; animation:slide .2s ease-out; }
 .drawer.open { display:block; }
-.drawer h4 { margin:0 0 10px; font-size:12px; }
-.row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:8px 0; font-size:11px; font-weight:600; color:var(--soft); }
-.check { display:flex; align-items:flex-start; gap:8px; margin:12px 0 4px; font-size:11px; line-height:1.35; color:var(--soft); cursor:pointer; }
-.check input { width:14px; height:14px; flex:0 0 auto; margin:1px 0 0; accent-color:var(--accent); }
-.hint { margin:0 0 8px 22px; color:var(--muted); font-size:10px; line-height:1.35; }
-input { height:30px; padding:5px 9px; border-radius:7px; border:1px solid rgba(255,255,255,.13);
-        background:rgba(8,9,13,.6); color:#fff; font:inherit; font-size:12px; outline:none; }
-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(125,84,217,.2); }
-input[type=number] { width:76px; text-align:right; -moz-appearance:textfield; }
-input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
-.search { width:100%; }
-.apply { width:100%; margin-top:6px; padding:7px; border-radius:7px; background:var(--accent); color:#fff; font-size:12px; font-weight:600; }
-.apply:hover { background:var(--accent-hi); }
-.results { margin-top:6px; max-height:180px; overflow-y:auto; }
-.result { display:block; width:100%; padding:6px 8px; border-radius:5px; background:transparent; color:var(--soft);
-          font-size:12px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.result:hover { background:rgba(125,84,217,.28); color:#fff; }
-.empty { padding:6px 8px; font-size:11px; color:var(--muted); }
+@keyframes slide { from { opacity:0; transform:translateY(-4px); } }
+.card { padding:12px; border-radius:12px; background:var(--bg-2); border:1px solid var(--line); }
+.card + .card { margin-top:10px; }
+.card-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.card-head svg { width:14px; height:14px; color:var(--accent); }
+.card-head h4 { margin:0; font-size:12.5px; font-weight:700; }
+.tag { margin-left:auto; padding:2px 8px; border-radius:999px; font-size:9.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.field { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.field > span { font-size:9.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.input { position:relative; }
+.input input { width:100%; }
+.input i { position:absolute; right:9px; top:50%; transform:translateY(-50%); font-style:normal; font-size:10.5px; font-weight:600; color:var(--muted); pointer-events:none; }
+.input input:has(+ i) { padding-right:28px; }
+input { height:32px; padding:6px 9px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text);
+        font:inherit; font-size:12.5px; font-weight:600; font-variant-numeric:tabular-nums; outline:none; transition:border-color .15s,box-shadow .15s; }
+input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+input::placeholder { color:var(--muted); font-weight:500; }
+input[type=number] { -moz-appearance:textfield; }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+
+.switch { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line); cursor:pointer; }
+.switch b { display:block; font-size:12px; font-weight:600; color:var(--soft); }
+.switch small { display:block; margin-top:2px; font-size:10.5px; color:var(--muted); line-height:1.35; }
+.switch input { position:absolute; opacity:0; width:0; height:0; pointer-events:none; }
+.knob { position:relative; width:34px; height:20px; flex-shrink:0; border-radius:999px; background:var(--bg-3); border:1px solid var(--line); transition:background .2s; }
+.knob::after { content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--muted); transition:transform .2s,background .2s; }
+.switch input:checked + .knob { background:var(--accent); border-color:transparent; }
+.switch input:checked + .knob::after { transform:translateX(14px); background:#fff; }
+
+.btn { width:100%; height:34px; margin-top:12px; border-radius:9px; font-size:12.5px; font-weight:700; color:#fff;
+       display:flex; align-items:center; justify-content:center; gap:7px; transition:filter .15s,transform .1s,color .15s; }
+.btn:hover { filter:brightness(1.12); }
+.btn:active { transform:scale(.98); }
+.btn svg { width:13px; height:13px; fill:currentColor; stroke:none; }
+.apply { background:var(--bg-3); border:1px solid var(--line); color:var(--soft); }
+.apply:hover { color:#fff; }
+.claim { background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 8px 20px rgba(99,102,241,.3); }
+.claim.running { background:var(--bg-3); box-shadow:none; color:var(--soft); }
+.claim.running:hover { color:var(--danger); filter:none; }
+.claim.done { background:var(--ok); box-shadow:0 8px 20px rgba(59,165,93,.3); }
+.claim.failed { background:var(--danger); box-shadow:0 8px 20px rgba(237,66,69,.3); }
+
+.summary { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:10px; }
+.stat { padding:8px 6px; border-radius:8px; background:var(--bg); border:1px solid var(--line); text-align:center; min-width:0; }
+.stat b { display:block; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.stat span { display:block; margin-top:2px; font-size:9px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); }
+.progress { display:none; margin-top:10px; }
+.progress.show { display:block; }
+.progress .track { height:6px; }
+.progress-text { display:flex; justify-content:space-between; margin-top:6px; font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
+
+.search-wrap { position:relative; }
+.search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--muted); }
+.search { width:100%; padding-left:32px; }
+.results { margin-top:8px; max-height:200px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--bg-3) transparent; }
+.result { display:block; width:100%; padding:7px 10px; border-radius:7px; color:var(--soft);
+          font-size:12.5px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.result:hover { background:var(--accent-soft); color:#fff; }
+.empty { padding:8px 10px; font-size:11.5px; color:var(--muted); }
 </style>
-<button class="mini" title="Show Game Presence">🎮</button>
+<button class="mini" title="Show Game Presence">${ICON.pad}</button>
 <div class="panel">
   <div class="head">
     <div class="badge"><span class="dot"></span><span class="count"></span></div>
     <div class="tools">
-      <button class="tool" data-act="search" title="Choose a game">🔍</button>
-      <button class="tool" data-act="settings" title="Settings">⚙</button>
-      <button class="tool" data-act="minimize" title="Minimize">_</button>
-      <button class="tool close" data-act="stop" title="Stop">✕</button>
+      <button class="tool" data-act="search" title="Choose a game">${ICON.search}</button>
+      <button class="tool" data-act="settings" title="Settings">${ICON.gear}</button>
+      <button class="tool" data-act="minimize" title="Minimize">${ICON.min}</button>
+      <button class="tool close" data-act="stop" title="Stop">${ICON.close}</button>
     </div>
   </div>
   <div class="game">
-    <div class="icon">🎮</div>
-    <div class="info"><div class="title">…</div><div class="sub"></div></div>
+    <div class="icon">${ICON.pad}</div>
+    <div class="info"><div class="label">Now playing</div><div class="title">…</div><div class="sub"></div></div>
   </div>
   <div class="track"><div class="bar"></div></div>
   <div class="player">
-    <button class="pbtn" data-act="prev" title="Previous game">⏮</button>
-    <button class="pbtn play" data-act="toggle" title="Pause">⏸</button>
-    <button class="pbtn" data-act="next" title="Next game">⏭</button>
+    <button class="pbtn" data-act="prev" title="Previous game">${ICON.prev}</button>
+    <button class="pbtn play" data-act="toggle" title="Pause">${ICON.pause}</button>
+    <button class="pbtn" data-act="next" title="Next game">${ICON.next}</button>
   </div>
   <div class="drawer" data-drawer="search">
-    <input class="search" type="text" placeholder="Search ${CATALOG.length} games…" spellcheck="false">
+    <div class="search-wrap">${ICON.search}<input class="search" type="text" placeholder="Search ${CATALOG.length.toLocaleString("en-US")} games…" spellcheck="false"></div>
     <div class="results"></div>
   </div>
   <div class="drawer" data-drawer="settings">
-    <h4>Change game every…</h4>
-    <div class="row"><label for="gp-min">Minimum (min)</label><input id="gp-min" type="number" min="1" max="1440"></div>
-    <div class="row"><label for="gp-max">Maximum (min)</label><input id="gp-max" type="number" min="1" max="1440"></div>
-    <div class="row"><label for="gp-rest">Offline break (min)</label><input id="gp-rest" type="number" min="1" max="10"></div>
-    <label class="check"><input id="gp-credit" type="checkbox"><span>Credit playtime to Discord analytics</span></label>
-    <p class="hint">Sends completed sessions to Discord. Disabled by default.</p>
-    <button class="apply" data-act="apply">Apply</button>
+    <div class="card">
+      <div class="card-head">${ICON.shuffle}<h4>Rotation</h4></div>
+      <div class="grid">
+        <label class="field"><span>Min</span><div class="input"><input id="gp-min" type="number" min="1" max="1440"><i>min</i></div></label>
+        <label class="field"><span>Max</span><div class="input"><input id="gp-max" type="number" min="1" max="1440"><i>min</i></div></label>
+        <label class="field"><span>Break</span><div class="input"><input id="gp-rest" type="number" min="1" max="10"><i>min</i></div></label>
+      </div>
+      <label class="switch">
+        <div><b>Credit playtime</b><small>Send each finished rotation session to Discord.</small></div>
+        <input id="gp-credit" type="checkbox"><span class="knob"></span>
+      </label>
+      <button class="btn apply" data-act="apply">Apply</button>
+    </div>
+    <div class="card">
+      <div class="card-head">${ICON.bolt}<h4>Batch claim</h4><span class="tag">Instant</span></div>
+      <div class="grid">
+        <label class="field"><span>Hours / game</span><div class="input"><input id="gp-hours" type="number" min="0.1" max="9999" step="0.5"><i>h</i></div></label>
+        <label class="field"><span>Games</span><div class="input"><input id="gp-count" type="number" min="1" placeholder="All"></div></label>
+        <label class="field"><span>Per request</span><div class="input"><input id="gp-chunk" type="number" min="1" max="500"></div></label>
+      </div>
+      <div class="summary">
+        <div class="stat"><b class="s-hours">–</b><span>Total hours</span></div>
+        <div class="stat"><b class="s-req">–</b><span>Requests</span></div>
+        <div class="stat"><b class="s-time">–</b><span>Est. time</span></div>
+      </div>
+      <div class="progress"><div class="track"><div class="pbar"></div></div><div class="progress-text"><span class="p-left"></span><span class="p-right"></span></div></div>
+      <button class="btn claim" data-act="claimAll">${ICON.bolt}<span class="claim-label">Claim all games</span></button>
+    </div>
   </div>
 </div>`;
 
@@ -2690,8 +2861,14 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
         const els = {
             count: $(".count"), icon: $(".icon"), title: $(".title"), sub: $(".sub"), bar: $(".bar"),
             play: $(".play"), min: $("#gp-min"), max: $("#gp-max"), rest: $("#gp-rest"), credit: $("#gp-credit"),
-            search: $(".search"), results: $(".results")
+            search: $(".search"), results: $(".results"),
+            hours: $("#gp-hours"), gameCount: $("#gp-count"), chunk: $("#gp-chunk"),
+            claim: $(".claim"), claimLabel: $(".claim-label"),
+            sHours: $(".s-hours"), sReq: $(".s-req"), sTime: $(".s-time"),
+            progress: $(".progress"), pbar: $(".pbar"), pLeft: $(".p-left"), pRight: $(".p-right")
         };
+        const fmt = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 1 });
+        let claimRun = null;
 
         const placeAtCorner = corner => {
             const [v, h] = corner.split("-");
@@ -2731,10 +2908,35 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
         $(".head").addEventListener("pointerup", endDrag);
         $(".head").addEventListener("pointercancel", endDrag);
 
+        const batchInputs = () => ({
+            hours: clamp(Number(els.hours.value) || DEFAULTS.batchHours, 0.1, 9999),
+            count: clamp(Math.floor(Number(els.gameCount.value)) || CATALOG.length, 1, CATALOG.length),
+            chunk: clamp(Math.floor(Number(els.chunk.value)) || DEFAULTS.batchChunk, 1, 500)
+        });
+        const updateSummary = () => {
+            const { hours, count, chunk } = batchInputs();
+            const requests = Math.ceil(count / chunk);
+            const seconds = requests * (BATCH_DELAY_MS / 1000 + 0.4);
+            els.sHours.textContent = fmt(Math.round(hours * count));
+            els.sReq.textContent = fmt(requests);
+            els.sTime.textContent = seconds < 60 ? `${Math.ceil(seconds)}s` : `${Math.ceil(seconds / 60)} min`;
+            if (!claimRun) els.claimLabel.textContent = count >= CATALOG.length ? "Claim all games" : `Claim ${fmt(count)} games`;
+        };
+        const saveBatchInputs = () => {
+            const { hours, chunk } = batchInputs();
+            settings.batchHours = hours;
+            settings.batchCount = Math.max(0, Math.floor(Number(els.gameCount.value)) || 0);
+            settings.batchChunk = chunk;
+            save();
+            updateSummary();
+        };
+
         const toggleDrawer = name => {
             for (const d of shadow.querySelectorAll(".drawer")) {
                 d.classList.toggle("open", d.dataset.drawer === name && !d.classList.contains("open"));
             }
+            const openName = shadow.querySelector(".drawer.open")?.dataset.drawer;
+            for (const b of shadow.querySelectorAll(".tool[data-act]")) b.classList.toggle("on", b.dataset.act === openName);
             if ($(`.drawer[data-drawer="search"]`).classList.contains("open")) {
                 els.search.value = "";
                 renderResults("");
@@ -2745,9 +2947,16 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
                 els.max.value = settings.maxMinutes;
                 els.rest.value = settings.restMinutes;
                 els.credit.checked = settings.creditPlaytime;
+                els.hours.value = settings.batchHours;
+                els.gameCount.value = settings.batchCount || "";
+                els.chunk.value = settings.batchChunk;
+                updateSummary();
             }
         };
-        const closeDrawers = () => shadow.querySelectorAll(".drawer").forEach(d => d.classList.remove("open"));
+        const closeDrawers = () => {
+            shadow.querySelectorAll(".drawer").forEach(d => d.classList.remove("open"));
+            shadow.querySelectorAll(".tool.on").forEach(b => b.classList.remove("on"));
+        };
 
         const renderResults = query => {
             const q = normalize(query);
@@ -2767,7 +2976,8 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
             settings.creditPlaytime = els.credit.checked;
             save();
         });
-        for (const input of [els.search, els.min, els.max, els.rest]) {
+        for (const input of [els.hours, els.gameCount, els.chunk]) input.addEventListener("input", saveBatchInputs);
+        for (const input of [els.search, els.min, els.max, els.rest, els.hours, els.gameCount, els.chunk]) {
             for (const type of ["keydown", "keyup", "keypress"]) {
                 input.addEventListener(type, e => e.stopPropagation());
             }
@@ -2793,6 +3003,44 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
             apply: () => {
                 setIntervals(Number(els.min.value), Number(els.max.value), Number(els.rest.value));
                 closeDrawers();
+            },
+            claimAll: () => {
+                if (claimRun) {
+                    claimRun.cancelled = true;
+                    els.claimLabel.textContent = "Stopping…";
+                    return;
+                }
+                const { hours, count, chunk } = batchInputs();
+                const run = claimRun = { cancelled: false };
+                const showProgress = (done, total) => {
+                    const pct = total ? Math.floor((done / total) * 100) : 0;
+                    els.pbar.style.width = `${pct}%`;
+                    els.pLeft.textContent = `${fmt(done)} / ${fmt(total)} games`;
+                    els.pRight.textContent = `${pct}%`;
+                };
+                const finish = (state, label) => {
+                    claimRun = null;
+                    els.claim.classList.remove("running");
+                    els.claim.classList.add(state);
+                    els.claimLabel.textContent = label;
+                    setTimeout(() => {
+                        if (claimRun) return;
+                        els.claim.classList.remove("done", "failed");
+                        els.progress.classList.remove("show");
+                        updateSummary();
+                    }, 5000);
+                };
+                els.claim.classList.remove("done", "failed");
+                els.claim.classList.add("running");
+                els.claimLabel.textContent = "Claiming… click to stop";
+                els.progress.classList.add("show");
+                showProgress(0, count);
+                batchClaimAll(hours, count, chunk, showProgress, run)
+                    .then(n => finish("done", run.cancelled ? `Stopped · ${fmt(n)} games` : `Done · ${fmt(n)} games`))
+                    .catch(error => {
+                        console.error("[Game Presence] Batch claim failed:", error);
+                        finish("failed", `Failed${error?.status ? ` · ${error.status}` : ""} · see console`);
+                    });
             }
         };
         shadow.addEventListener("click", e => {
@@ -2815,7 +3063,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
                     els.title.textContent = name;
                     els.title.title = name;
                     els.title.style.opacity = "1";
-                    els.icon.textContent = "🎮";
+                    els.icon.innerHTML = ICON.pad;
                     iconUrl(applicationId).then(url => {
                         if (!url || token !== renderToken) return;
                         const img = new Image();
@@ -2837,6 +3085,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
                     return;
                 }
                 if (!nextSwitchAt) {
+                    if (!current) els.count.textContent = "Paused";
                     els.sub.textContent = "Rotation paused";
                     els.bar.style.width = "0%";
                     return;
@@ -2849,10 +3098,13 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
             },
             setPaused(paused) {
                 panel.classList.toggle("paused", paused);
-                els.play.textContent = paused ? "▶" : "⏸";
+                els.play.innerHTML = paused ? ICON.play : ICON.pause;
                 els.play.title = paused ? "Resume rotation" : "Pause rotation";
             },
-            destroy() { host.remove(); }
+            destroy() {
+                if (claimRun) claimRun.cancelled = true;
+                host.remove();
+            }
         };
     })();
 
@@ -2868,6 +3120,8 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
             playIndex(i);
         },
         setIntervals,
+        batchClaim: (hours = settings.batchHours, count = null, perRequest = settings.batchChunk) =>
+            batchClaimAll(hours, count, perRequest),
         get current() { return current?.name ?? null; },
         get games() { return CATALOG.map(([n]) => n); }
     };
@@ -2884,5 +3138,5 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
         throw error;
     }
 
-    console.log(`[Game Presence] ${CATALOG.length} games loaded. Commands: window.__gamePresence.next() / .play("Minecraft") / .stop()`);
+    console.log(`[Game Presence] ${CATALOG.length} games loaded. Commands: window.__gamePresence.next() / .play("Minecraft") / .batchClaim(hours, count, perRequest) / .stop()`);
 })();
