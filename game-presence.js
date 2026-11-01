@@ -5,7 +5,6 @@ void (async () => {
     const STORAGE_KEY = "game-presence-v2";
 
     if (window[LOCK]?.stop) {
-        console.warn("[Game Presence] An older instance was found. Stopping it before reload.");
         window[LOCK].stop();
     }
 
@@ -13,1868 +12,1185 @@ void (async () => {
     const loadingLock = { loading: true, stop: () => { cancelledWhileLoading = true; } };
     window[LOCK] = loadingLock;
 
-    let CATALOG = [
-        ["SpeedRunners","259392830932254721"],
-        ["Move or Die","343232907390746625"],
-        ["Holodrive","346729383693778944"],
-        ["GRIP","348146938681622538"],
-        ["Hellion","349114016968474626"],
-        ["Divinity Original Sin 2","349134787773988865"],
-        ["Foxhole","349947310375043074"],
-        ["Unturned","351821143981817856"],
-        ["Battlerite","352378924317147156"],
-        ["League of Legends","356869127241072640"],
-        ["PLAYERUNKNOWN'S BATTLEGROUNDS","356873622985506820"],
-        ["Counter-Strike: Global Offensive","356875057940791296"],
-        ["Overwatch","356875221078245376"],
-        ["Minecraft","356875570916753438"],
-        ["World of Warcraft","356875762940379136"],
-        ["Hearthstone","356875890958925834"],
-        ["Dota 2","356875988589740042"],
-        ["Grand Theft Auto V","356876176465199104"],
-        ["Grand Theft Auto VI","1445160676522856458"],
-        ["Tom Clancy's Rainbow Six Siege","356876590342340608"],
-        ["Rocket League","356877880938070016"],
-        ["Heroes of the Storm","356878860190613504"],
-        ["Garry's Mod","356879032584896512"],
-        ["H1Z1: King of the Kill","356881342321000448"],
-        ["ARK: Survival Evolved","356887282982191114"],
-        ["Path of Exile","356888453796986880"],
-        ["Team Fortress 2","356888577310851072"],
-        ["Rust","356888738724446208"],
-        ["World of Tanks","356888961353908224"],
-        ["FINAL FANTASY XIV","356889262362329098"],
-        ["Geometry Dash","356942674672091136"],
-        ["Dolphin","356943187589201930"],
-        ["Terraria","356943499456937984"],
-        ["Brawlhalla","356944273133928458"],
-        ["The Walking Dead","356953358952562688"],
-        ["Sonic Mania","356953520278339584"],
-        ["Golf With Your Friends","356954034701205504"],
-        ["Cities: Skylines","356954111901433856"],
-        ["Arma 3","356954176338788352"],
-        ["Left 4 Dead 2","356954277803065354"],
-        ["Project 64","357606193918771210"],
-        ["RuneScape","357606832899883008"],
-        ["Dead by Daylight","357607133254254632"],
-        ["War Thunder","357607478105604096"],
-        ["World of Warships","357607617046249482"],
-        ["Duelyst","357706468843061258"],
-        ["Battlefield 1","358417041981571082"],
-        ["The Binding of Isaac: Rebirth","358420454764969994"],
-        ["Black Desert Online","358420844491440148"],
-        ["Black Squad","358421399670358026"],
-        ["HIVESWAP: ACT 1","358421573071536128"],
-        ["Hearts of Iron IV","358421669603311616"],
-        ["Monaco","358421725139959808"],
-        ["Blade & Soul","358421781398421514"],
-        ["Sid Meier's Civilization V","358421904601776138"],
-        ["SMITE","358422012990849024"],
-        ["Factorio","358422126602223616"],
-        ["Diablo III","358425751197974528"],
-        ["StarCraft II","358425800766128128"],
-        ["The Elder Scrolls V: Skyrim","359507724196773888"],
-        ["Tom Clancy's The Division","359507798930751488"],
-        ["Don't Starve Together","359508004078616586"],
-        ["ShellShock Live","359508342571401216"],
-        ["Space Engineers","359508404034600990"],
-        ["Euro Truck Simulator 2","359508713658253318"],
-        ["Portal 2","359508941782122496"],
-        ["The Sims 4","359509007423242240"],
-        ["Call of Duty: Black Ops III","359509332490059776"],
-        ["Stardew Valley","359509387670192128"],
-        ["DARK SOULS III","359509500199436288"],
-        ["Counter-Strike: Source","359509666876751872"],
-        ["Fallout 4","359509759642042378"],
-        ["Fallout: New Vegas","359509858728542208"],
-        ["MapleStory","359510095811444736"],
-        ["The Witcher 3: Wild Hunt","359510249486417920"],
-        ["Half-Life 2","359510373361254400"],
-        ["Battlefield 4","359510680459673610"],
-        ["XCOM 2","359510740878491658"],
-        ["Guild Wars 2","359511228445491200"],
-        ["The Elder Scrolls V: Skyrim Special Edition","359801269008859136"],
-        ["Tooth and Tail","360541292578471937"],
-        ["Outlast","363408634568376320"],
-        ["Depth","363408709495291934"],
-        ["Tabletop Simulator","363408834095742976"],
-        ["Stellaris","363408909962182683"],
-        ["Trove","363409000399634432"],
-        ["Gang Beasts","363409129643180032"],
-        ["The Forest","363409179668512788"],
-        ["Insurgency","363409205740175360"],
-        ["Europa Universalis IV","363409417632481280"],
-        ["Town of Salem","363409453699170304"],
-        ["Robocraft","363409532480913408"],
-        ["Golf It!","363409575321403402"],
-        ["Shadowverse","363409615620407316"],
-        ["7 Days to Die","363409643973771264"],
-        ["Killing Floor 2","363409749175173120"],
-        ["StarCraft","363409793119158272"],
-        ["Undertale","363409849859571722"],
-        ["Duck Game","363410951518552064"],
-        ["Dirty Bomb","363411048713420800"],
-        ["Business Tour - Online Multiplayer Board Game","363411278527594516"],
-        ["Fallout Shelter","363411364552638464"],
-        ["Slime Rancher","363411395854991400"],
-        ["Last Man Standing","363411421553360896"],
-        ["Titanfall 2","363411468441354240"],
-        ["STAR WARS™ Battlefront™","363412167934083072"],
-        ["Mount & Blade: Warband","363412302998929418"],
-        ["STAR WARS: The Old Republic","363412489599188992"],
-        ["PlanetSide 2","363412528308682752"],
-        ["Clicker Heroes","363412660680785940"],
-        ["Psychonauts","363412675650125825"],
-        ["American Truck Simulator","363412692083671040"],
-        ["Call of Duty: World at War","363412728888557568"],
-        ["Crossout","363412799117852672"],
-        ["Dofus","363412841862266880"],
-        ["Comedy Night","363413176605212682"],
-        ["Enter the Gungeon","363413202090065920"],
-        ["Elite Dangerous","363413225578037248"],
-        ["Wizard101","363413310474813450"],
-        ["AdVenture Capitalist","363413365667921930"],
-        ["Age of Empires II: HD Edition","363413389021675530"],
-        ["EVE Online","363413402300710912"],
-        ["Heat Signature","363413452976553984"],
-        ["RimWorld","363413465584500737"],
-        ["WarThunder","363413661567680522"],
-        ["Rivals of Aether","363413717267906560"],
-        ["BeamNG.drive","363413743335374859"],
-        ["Subnautica","363413811518242816"],
-        ["Sid Meier's Civilization VI","363413834301571072"],
-        ["The Elder Scrolls Online","363413894602948608"],
-        ["DOOM","363413961967927306"],
-        ["FTL: Faster Than Light","363414030188150801"],
-        ["Realm of the Mad God","363414084542005258"],
-        ["Just Cause 3","363414140502671360"],
-        ["Portal","363414173457186826"],
-        ["Dead Cells","363414360422612992"],
-        ["FIFA 17","363414398129274890"],
-        ["DRAGON BALL XENOVERSE 2","363414443129831444"],
-        ["Friday the 13th: The Game","363414482615271434"],
-        ["Prison Architect","363414635812093962"],
-        ["TEKKEN 7","363414667797725184"],
-        ["The Escapists 2","363414712186306560"],
-        ["Crusader Kings II","363414742661988352"],
-        ["Microtransaction Simulator","363414852410015744"],
-        ["Middle-earth: Shadow of Mordor","363424997080956928"],
-        ["METAL GEAR SOLID V: THE PHANTOM PAIN","363425113879609344"],
-        ["Idle Champions of the Forgotten Realms","363425133274333214"],
-        ["HuniePop","363425169051615262"],
-        ["Ultimate Chicken Horse","363425213905371146"],
-        ["NieR:Automata","363425276300099584"],
-        ["DARK SOULS II: Scholar of the First Sin","363426741269692416"],
-        ["Total War: WARHAMMER II","363426802640617482"],
-        ["Skullgirls","363426862363574272"],
-        ["Farming Simulator 17","363426921612181504"],
-        ["100% Orange Juice","363427044333191169"],
-        ["Crypt of the NecroDancer","363427101346627584"],
-        ["Call of Duty: Black Ops II","363427270024626176"],
-        ["Sonic Adventure 2","363427419249442816"],
-        ["Bloons TD Battles","363427491995713536"],
-        ["Dishonored","363427574707257354"],
-        ["Sven Co-op","363427674309263360"],
-        ["Tower Unite","363427800088313856"],
-        ["Dying Light","363427839137153024"],
-        ["Chivalry: Medieval Warfare","363427969324023808"],
-        ["Squad","363428011980357632"],
-        ["ASTRONEER","363428060604792832"],
-        ["Creativerse","363428103919239168"],
-        ["Oddworld: Abe's Oddysee","363428220617621504"],
-        ["Tom Clancy's Ghost Recon Wildlands","363428336749379604"],
-        ["Warhammer: End Times - Vermintide","363429268577058816"],
-        ["BattleBlock Theater","363429294778744832"],
-        ["Killing Floor","363429388156403712"],
-        ["Kerbal Space Program","363429406376722442"],
-        ["Rise of the Tomb Raider","363429423728427008"],
-        ["Castle Crashers","363429462076817408"],
-        ["Infestation: The New Z","363429491034554368"],
-        ["Mirage: Arcane Warfare","363429532377677824"],
-        ["Fistful of Frags","363429654540845056"],
-        ["STAR WARS™ Battlefront™ II","363429717698936852"],
-        ["Cuphead","363430002181668864"],
-        ["NARUTO SHIPPUDEN: Ultimate Ninja STORM 4","363430045970071552"],
-        ["TERA","363430088521547786"],
-        ["Saints Row IV","363430103306338304"],
-        ["Absolver","363430239134547978"],
-        ["Total War: WARHAMMER","363430260810973194"],
-        ["Scrap Mechanic","363430304746176512"],
-        ["Oxygen Not Included","363430471322828800"],
-        ["Half-Life","363430548028522496"],
-        ["Nuclear Throne","363430560942653440"],
-        ["No More Room in Hell","363430673694064640"],
-        ["The Sims 3","363430739456425994"],
-        ["Divinity: Original Sin Enhanced Edition","363430797257998356"],
-        ["Ravenfield","363430881811234816"],
-        ["Life is Strange","363430904867192832"],
-        ["Hollow Knight","363431029484027904"],
-        ["Saints Row: The Third","363431107527704576"],
-        ["Planet Coaster","363431197960962049"],
-        ["Dishonored 2","363431216000532480"],
-        ["Clustertruck","363431307629559808"],
-        ["Crush Crush","363431341599096842"],
-        ["Battlefield 3","363431403469144064"],
-        ["World War II Online","363431447119527956"],
-        ["Company of Heroes 2","363431541336047616"],
-        ["Realm Grinder","363431556301193216"],
-        ["Project CARS","363431703504748544"],
-        ["Half-Life: C.A.G.E.D.","363431787214536704"],
-        ["Guitar Hero III: Legends of Rock","363431817312731136"],
-        ["ROBLOX","363445589247131668"],
-        ["Grand Theft Auto San Andreas","363447565905166336"],
-        ["PAYDAY 2","364785249202208768"],
-        ["Ballistic Overkill","365200071941292033"],
-        ["Call of Duty®: WWII","365569601993572352"],
-        ["osu!","367827983903490050"],
-        ["Destiny 2","372438022647578634"],
-        ["Hob","372440317493903380"],
-        ["Fallout","372825995084038144"],
-        ["Middle-earth: Shadow of War","372826898465685519"],
-        ["Descenders","375540160571637760"],
-        ["Wolfenstein: The New Order","376171871873400832"],
-        ["Day of Infamy","376180187806695462"],
-        ["Deceit","376180386801123358"],
-        ["Darkest Dungeon","376180518749995028"],
-        ["Bendy and the Ink Machine","376180724291731472"],
-        ["A Hat in Time","376180889010307072"],
-        ["Besiege","376181155868966912"],
-        ["Life is Strange: Before the Storm","376181248596508672"],
-        ["GUNS UP!","376181312890863616"],
-        ["AT SUNDOWN: SitD","379732021385232385"],
-        ["Warframe Dev","383379166323539969"],
-        ["H1Z1","385537545276096522"],
-        ["Yu-Gi-Oh! Duel Links","385537699366305792"],
-        ["FIFA 18","385537854320934922"],
-        ["Sanctum 2","385537957806866432"],
-        ["Human: Fall Flat","385538103831429120"],
-        ["Watch Dogs","385538279090683924"],
-        ["Assassin's Creed Origins","385538388419280896"],
-        ["CS2D","385538625221165056"],
-        ["Wolfenstein II: The New Colossus","385538682184269834"],
-        ["DayZ","385538724592746496"],
-        ["Brutal Legend","385538840162467860"],
-        ["Zombidle","387375748262002710"],
-        ["Shadowrun: Hong Kong","387376045269057564"],
-        ["Rising Storm 2: Vietnam","387402304158040074"],
-        ["The Bureau: XCOM Declassified","387402716965634066"],
-        ["Elsword","387402920238383122"],
-        ["Total War: Rome 2","387403734080159763"],
-        ["Freddy Fazbear's Pizzeria Simulator","389964632527339534"],
-        ["Getting Over It with Bennett Foddy","389968138688659466"],
-        ["Guns of Icarus Online","390293569832878098"],
-        ["Guns of Icarus Alliance","390293932199772160"],
-        ["Zombidle: REMONSTERED","393178973129015328"],
-        ["Guns N' Boxes","393511930838515742"],
-        ["VRChat","398632010442211348"],
-        ["Red Crucible: Firestorm","403373728290963478"],
-        ["Assassin's Creed IV Black Flag","406637677199360030"],
-        ["Escape from Tarkov","406637848297472017"],
-        ["SCP: Secret Laboratory","406637935417622558"],
-        ["They Are Billions","406638043894775819"],
-        ["The Long Dark","406638150857785344"],
-        ["Pokémon Trading Card Game Online","406638244835622912"],
-        ["Kingdom: Classic","406638362196312074"],
-        ["Don't Starve","406643893007024149"],
-        ["GWENT: The Witcher Card Game ","406643974183452681"],
-        ["Long Live Santa!","406644036963663890"],
-        ["Slay the Spire","406644123832156160"],
-        ["Kingdoms and Castles","406645058599780368"],
-        ["Northgard","406645134445248530"],
-        ["Broforce","406645260987662366"],
-        ["CrossFire BR","406645350506561547"],
-        ["Neverwinter","406645401437863936"],
-        ["Tibia","406645450863804416"],
-        ["Papers, Please","406645580375392256"],
-        ["Closers","406645631864537088"],
-        ["Spore","406645798680657920"],
-        ["Plague Inc: Evolved","406645878980476928"],
-        ["Borderlands: The Pre-Sequel","406645950782636041"],
-        ["Hotline Miami","406646037571436544"],
-        ["Homefront","406646102297804826"],
-        ["theHunter™: Call of the Wild","406646161563189258"],
-        ["Tomb Raider","406646264093212682"],
-        ["The Binding of Isaac","406646308309434378"],
-        ["We Were Here","406646387875250186"],
-        ["This War of Mine","406646471098892298"],
-        ["Hotline Miami 2: Wrong Number","406646550731816960"],
-        ["Wulverblade","410909667334684672"],
-        ["Hand Simulator","418232964783144980"],
-        ["Kingdom Come: Deliverance","419267878014025728"],
-        ["DRAGON BALL FighterZ","419268865667629056"],
-        ["BATTALION 1944","419271532087607296"],
-        ["World of Tanks Blitz","419272031960432651"],
-        ["던전앤파이터","421150671836938240"],
-        ["DARK SOULS™: Prepare To Die Edition","421150676710588416"],
-        ["Total War Arena","421150683329462272"],
-        ["Doki Doki Literature Club","421150694683312138"],
-        ["Borderlands 2","421150698168909834"],
-        ["Forsaken Remastered","421798336694059018"],
-        ["SoulWorker","421858437039783936"],
-        ["Hunt: Showdown","422169383972896768"],
-        ["Warframe","422772752647323649"],
-        ["Warcraft III","424719708785344525"],
-        ["Bastion","425404251292958736"],
-        ["Assassin's Creed Chronicles China","425433703041335346"],
-        ["Assassin's Creed","425434240784662551"],
-        ["Assassin's Creed II","425434695908458519"],
-        ["Assassin's Creed III","425434783695503360"],
-        ["Assassin's Creed Rogue","425434983080001556"],
-        ["Assassin's Creed Unity","425435152634609664"],
-        ["Assassin's Creed Brotherhood","425435232788021258"],
-        ["Assassin's Creed Revelations","425436928041680931"],
-        ["Batman: Arkham Knight","425437076188561408"],
-        ["Batman: Arkham Origins","425437243822571550"],
-        ["Batman: Arkham VR","425437344758366216"],
-        ["Beyond Good and Evil","425437404854222858"],
-        ["F.E.A.R.","425437484735004682"],
-        ["F.E.A.R. 2: Project Origin","425437598836719616"],
-        ["F.E.A.R. 3","425437856169721856"],
-        ["Far Cry","425437906363219968"],
-        ["Far Cry 2","425437961669181477"],
-        ["Far Cry 4","425438134709518336"],
-        ["Far Cry Primal","425438207631556608"],
-        ["For Honor","425438403819995145"],
-        ["Injustice: Gods Among Us Ultimate Edition","425438526491066388"],
-        ["Just Dance 2017","425438596883939328"],
-        ["LEGO® The Hobbit™","425439134551900190"],
-        ["LEGO® Worlds","425439198733008896"],
-        ["Mad Max","425439256001904650"],
-        ["Mortal Kombat Komplete Edition","425439413972238366"],
-        ["Mortal Kombat X","425439470075117573"],
-        ["Rayman Legends","425439545983500288"],
-        ["Rayman Origins","425439593882714133"],
-        ["Rocksmith 2014","425439633917214720"],
-        ["Scribblenauts Unlimited","425439683938353162"],
-        ["Steep","425439790746566666"],
-        ["The Crew","425439876939382804"],
-        ["The LEGO® Movie - Videogame","425439950553481216"],
-        ["Tom Clancy's Ghost Recon Future Soldier","425440004983226378"],
-        ["Tom Clancy's Splinter Cell","425440094263050250"],
-        ["Tom Clancy's Splinter Cell Blacklist","425440144829448192"],
-        ["Trackmania Turbo","425440195966664704"],
-        ["Trials Fusion","425440259539599390"],
-        ["Watch_Dogs","425440319509626881"],
-        ["Watch_Dogs 2","425440363688493066"],
-        ["Darksiders Warmastered Edition","425440430772060160"],
-        ["ELEX","425440477882351626"],
-        ["Fade to Silence","425440525286637577"],
-        ["Impossible Creatures","425440563337232394"],
-        ["Ori and the Blind Forest: Definitive Edition","425440642173239296"],
-        ["Red Faction","425440700335915028"],
-        ["SpellForce 2 - Anniversary Edition","425440739166650368"],
-        ["The Guild 3","425440832238387200"],
-        ["Firewatch","425440941793345536"],
-        ["The Witness","425441014292152320"],
-        ["The Talos Principle","425441094482919464"],
-        ["The Surge","425441321512075264"],
-        ["Rebel Galaxy","425441408242155530"],
-        ["Fractured Space","425441448410873866"],
-        ["Planetary Annihilation: TITANS","425441516354273280"],
-        ["Hyper Light Drifter","425441571656433664"],
-        ["Stonehearth","425441650878316564"],
-        ["Obduction","425441688152965142"],
-        ["Shovel Knight","425441726736629760"],
-        ["Battle Chasers: Nightwar","425441774450901002"],
-        ["Wolcen: Lords of Mayhem","425441823754813455"],
-        ["Planet Nomads","425441961877700618"],
-        ["Agents of Mayhem","425442005766766592"],
-        ["Dead Island Definitive Edition","425442043616034816"],
-        ["Dead Island Riptide Definitive Edition","425442091666243594"],
-        ["DiRT 4","425442140731080704"],
-        ["F1 2016","425442173559767040"],
-        ["F1 2017","425442216639725578"],
-        ["Homefront: The Revolution","425442258020597760"],
-        ["Metro 2033 Redux","425442324495990784"],
-        ["Metro: Last Light Redux","425442388270645248"],
-        ["Micro Machines World Series","425442430922391552"],
-        ["Mighty No. 9","425442465244250132"],
-        ["Risen","425442503198769152"],
-        ["Ryse: Son of Rome","425442538288185344"],
-        ["Saints Row 2","425442587508211712"],
-        ["Bridge Constructor","425442642680348692"],
-        ["Bridge Constructor Portal","425442712095948800"],
-        ["Dead Age","425442752562462720"],
-        ["SEUM: Speedrunners from Hell","425442824134328320"],
-        ["BioShock 2","425442925967573002"],
-        ["BioShock™ 2 Remastered","425442965255880704"],
-        ["BioShock Infinite","425442995681230858"],
-        ["BioShock™ Remastered","425443045417156618"],
-        ["Borderlands","425443081916252160"],
-        ["Mafia","425443205195104277"],
-        ["Mafia II","425443244285886494"],
-        ["Mafia III","425443292831023113"],
-        ["Sid Meier's Civilization: Beyond Earth","425443404277743616"],
-        ["WWE 2K18","425443442181537792"],
-        ["Deponia","425443478525444106"],
-        ["Shadow Tactics: Blades of the Shogun","425443548079456285"],
-        ["Silence","425443601154048020"],
-        ["Kingdom: New Lands","425443637892218890"],
-        ["GoNNER","425443673698861066"],
-        ["Guild of Dungeoneering","425443709958488064"],
-        ["Antihero","425443745866186752"],
-        ["Let Them Come","425443777621131264"],
-        ["LEGO® STAR WARS™: The Force Awakens","425443938271363095"],
-        ["LEGO® MARVEL's Avengers","425449323346657290"],
-        ["LEGO® Jurassic World","425450411391057950"],
-        ["From Dust","425450802316967956"],
-        ["Rocksmith","425450896877420565"],
-        ["Tom Clancy's Ghost Recon","425451104117981184"],
-        ["ArcaniA","425451163807383552"],
-        ["MX vs. ATV Unleashed","425451199756632084"],
-        ["The Dwarves","425451237387796490"],
-        ["Sunless Skies","425451303985217536"],
-        ["Deadlight: Director's Cut","425451345865211904"],
-        ["Sacred 3","425451387724234752"],
-        ["Trainz: A New Era","425451439318630424"],
-        ["The Inner World","425451474122833930"],
-        ["Assassin's Creed Freedom Cry","425453860392402964"],
-        ["Assassin's Creed Syndicate","425453938582487068"],
-        ["Bloody Good Time","425453978114064424"],
-        ["Far Cry 3 Blood Dragon","425454019205529600"],
-        ["I Am Alive","425454053795823626"],
-        ["Prince of Persia","425454114999369728"],
-        ["Black Mirror","425454162705252372"],
-        ["Darksiders II: Deathinitive Edition","425454199371726858"],
-        ["Delta Force: Land Warrior","425454276719017994"],
-        ["Full Spectrum Warrior","425454306737520650"],
-        ["Full Spectrum Warrior: Ten Hammers","425454342888488960"],
-        ["Men of Valor","425454383820570664"],
-        ["Nexus: The Jupiter Incident","425454420289912832"],
-        ["Sine Mora EX","425454457434931200"],
-        ["Sphinx and the Cursed Mummy","425454500883595264"],
-        ["The Book of Unwritten Tales 2","425454534907658240"],
-        ["The Guild Gold Edition","425454572778291210"],
-        ["Homesick","425454613827813376"],
-        ["Shroud of the Avatar","425454648623628288"],
-        ["Descent: Underground","425454679854678036"],
-        ["Escape Dead Island","425454719817875456"],
-        ["Bridge Constructor Medieval","425454757130272768"],
-        ["Bridge Constructor Playground","425454789405704202"],
-        ["Bridge Constructor Stunts","425454826042818590"],
-        ["Deadly 30","425454866014404618"],
-        ["Dub Dash","425454898759598080"],
-        ["Looterkings","425454939452604436"],
-        ["Pixel Heroes: Byte & Magic","425454980489543680"],
-        ["Rockfest","425455011221471232"],
-        ["Slime-san","425455040082345984"],
-        ["A New Beginning - Final Cut","425455073661812766"],
-        ["AER Memories of Old","425455104632815636"],
-        ["Anna's Quest","425455138459746304"],
-        ["Blackguards","425455172714496015"],
-        ["Blackguards 2","425455204218175498"],
-        ["Crazy Machines 3","425455241597681664"],
-        ["Edna & Harvey: Harvey's New Eyes","425455277337214976"],
-        ["Edna & Harvey: The Breakout","425455323646787584"],
-        ["Journey of a Roach","425455356181872640"],
-        ["Ken Follett's The Pillars of the Earth","425455393401995264"],
-        ["Memoria","425455438050623498"],
-        ["Munin","425455471172911104"],
-        ["Shooting Stars!","425455505331191808"],
-        ["The Dark Eye: Chains of Satinav","425455537803755530"],
-        ["The Long Journey Home","425455571869761536"],
-        ["The Night of the Rabbit","425455612508241920"],
-        ["The Whispered World Special Edition","425455671052599296"],
-        ["Kathy Rain","425455715205906432"],
-        ["Uurnog Uurnlimited","425455750031081472"],
-        ["Dandara","425455780360355850"],
-        ["Armikrog","425455814497665034"],
-        ["Toren","425455851243831296"],
-        ["Call of Juarez - Gunslinger","425456506431995914"],
-        ["Trials of the Blood Dragon","425456603765145656"],
-        ["Delta Force: Task Force Dagger","425456638154113044"],
-        ["Lock's Quest","425456670362042368"],
-        ["Rad Rodgers","425456700640985108"],
-        ["Tachyon: The Fringe","425456735050924032"],
-        ["The Book of Unwritten Tales: The Critter Chronicles","425456762569621514"],
-        ["Inside","425456795683913750"],
-        ["The Universim","425456822258892810"],
-        ["Lost Horizon","425456853070118922"],
-        ["Grotesque Tactics: Evil Heroes","425456981332197386"],
-        ["In Between","425457045098070026"],
-        ["Meridian: New World","425457072818094080"],
-        ["Safety First!","425457108167950346"],
-        ["Townsmen","425457401769099297"],
-        ["Viking Rage","425457433565986838"],
-        ["Windscape","425457461731000320"],
-        ["Assassin's Creed Liberation HD","425457838731690003"],
-        ["Justice League VR: The Complete Experience","425457887339348005"],
-        ["South Park The Stick of Truth","425457961574596608"],
-        ["Battle Worlds: Kronos","425458030537211904"],
-        ["Overclocked: A History of Violence","425458153262546944"],
-        ["SuperPower 2","425458179539730462"],
-        ["This is the Police","425458210175188992"],
-        ["Superhot","425458238595661854"],
-        ["Lost Horizon 2","425458269360750592"],
-        ["Metro Redux","425458328278401044"],
-        ["Secret Files 3","425458354756911104"],
-        ["Clouds & Sheep 2","425458381835206656"],
-        ["Future Wars","425458408037285888"],
-        ["Game Royale 2 - The Secret of Jannis Island","425458432569638912"],
-        ["Greed: Black Border","425458464714653696"],
-        ["Holy Avatar vs. Maidens of the Dead","425458490878984192"],
-        ["Meridian: Squad 22","425458524865298432"],
-        ["Race.a.bit","425458558620925982"],
-        ["Shiny The Firefly","425458574731509760"],
-        ["Skilltree Saga","425458587985379328"],
-        ["SoulCraft","425458618108739614"],
-        ["Stellar Impact","425458648006000640"],
-        ["Subsiege","425458682566934538"],
-        ["Super Treasure Arena","425458718537154560"],
-        ["Trapped Dead: Lockdown","425458758504939540"],
-        ["TRISTOY","425458781451845632"],
-        ["Trulon: The Shadow Engine","425458804868513802"],
-        ["Twin Sector","425458819636920320"],
-        ["Gotham City Impostors Free to Play","425459839494389780"],
-        ["Heroes of Might and Magic III HD","425459913200762889"],
-        ["Might and Magic - Heroes V","425460002761998347"],
-        ["LEGO® Batman 2 DC Super Heroes™","425460322619490304"],
-        ["LEGO Batman","425460379624144925"],
-        ["LEGO Harry Potter: Years 1-4","425460457558769674"],
-        ["Scribblenauts Unmasked: A DC Comics Adventure","425460538110246912"],
-        ["Silent Hunter 3","425460595718881280"],
-        ["South Park Fractured But Whole","425460666930036736"],
-        ["Lord of the Rings: War in the North","425460776195719168"],
-        ["Tom Clancy's Rainbow Six 3","425460908345524224"],
-        ["Tom Clancy's Rainbow Six Vegas","425460989602037770"],
-        ["Tom Clancy's Rainbow Six Vegas II","425470018130673664"],
-        ["Tom Clancy's Splinter Cell Chaos Theory","425470107368554504"],
-        ["The Guild 2 Renaissance","425470196439056391"],
-        ["Soma","425470408322449418"],
-        ["Hellblade","425470569698557962"],
-        ["DiRT Rally","425471119068364819"],
-        ["Killer Is Dead - Nightmare Edition","425471324073230336"],
-        ["Saints Row: Gat out of Hell","425471448782733331"],
-        ["The Banner Saga","425471698284970020"],
-        ["Trackmania United Forever","425709280725958689"],
-        ["Trials Evolution","425709676965920788"],
-        ["Neighbours From Hell Compilation","425709808705077272"],
-        ["The Guild II","425710142252777508"],
-        ["The Flame in the Flood","425713116903505930"],
-        ["Dreamfall Chapters: The Longest Journey","425713647222784010"],
-        ["Risen 3 - Titan Lords","425714129152770048"],
-        ["Sacred 2 Gold","425714299877589002"],
-        ["Deponia: The Complete Journey","425714472997355560"],
-        ["Chaos on Deponia","425714655726665788"],
-        ["The Banner Saga 2","425722711180967946"],
-        ["Tormentor❌Punisher","425723123187449856"],
-        ["Assassin’s Creed® Chronicles: India","425725558626844702"],
-        ["Batman: Arkham Asylum GOTY Edition","425727574539370529"],
-        ["Brothers in Arms: Road to Hill 30","425727812490493972"],
-        ["Call of Juarez: Bound in Blood","425728267123949578"],
-        ["Child of Light","425728327505018921"],
-        ["Prince of Persia: The Sands of Time","425728421788909568"],
-        ["Prince of Persia: Warrior Within","425728459600429056"],
-        ["Silent Hunter 5: Battle of the Atlantic","425728548586913812"],
-        ["Silent Hunter: Wolves of the Pacific","425728586192912384"],
-        ["The Lord of the Rings: War in the North","425728616450490368"],
-        ["Delta Force: Black Hawk Down","425731190570483757"],
-        ["Painkiller: Black Edition","425731299936960512"],
-        ["SpellForce: Platinum Edition","425731382820470824"],
-        ["The Guild II - Pirates of the European Seas","425731435929010195"],
-        ["Codename CURE","425748063416483870"],
-        ["Dungeon Defenders II","425748090889175050"],
-        ["Cry of Fear","425748259408183306"],
-        ["Blackwake","425748296854667264"],
-        ["Age of Empires® III: Complete Collection","425748312143167498"],
-        ["Far Cry® 3","425748544134053888"],
-        ["Football Manager 2018","425748782978826254"],
-        ["Total War: ATTILA","425748853132754945"],
-        ["FINAL FANTASY XV WINDOWS EDITION","425748942676819968"],
-        ["Evolve Stage 2","425748985517703188"],
-        ["Total War: SHOGUN 2","425749196403114024"],
-        ["Into the Breach","425749372332933120"],
-        ["Alien Swarm: Reactive Drop","425749425168580608"],
-        ["TrackMania Nations Forever","425749438573707264"],
-        ["Left 4 Dead","425749516583698432"],
-        ["Amnesia: The Dark Descent","425749626671595520"],
-        ["Game Dev Tycoon","425749842451496961"],
-        ["Banished","425750064963780628"],
-        ["Of Guards And Thieves","425750237534224394"],
-        ["Who's Your Daddy","425751000477990922"],
-        ["FINAL FANTASY XV WINDOWS EDITION PLAYABLE DEMO","425751261095264276"],
-        ["Call of Duty: Modern Warfare 2","425777093628919828"],
-        ["Torchlight II","425777164361793547"],
-        ["Super Meat Boy","425777385103949834"],
-        ["Men of War: Assault Squad 2","425777482860331018"],
-        ["Darwin Project","425777491068715018"],
-        ["Hyper Universe","425777540263837706"],
-        ["Grim Dawn","425777682135908352"],
-        ["Rising Storm/Red Orchestra 2 Multiplayer","425777721159974922"],
-        ["Fishing Planet","425777941499215872"],
-        ["Assetto Corsa","425778010222886912"],
-        ["Aim Hero","425778246941016064"],
-        ["Source Filmmaker","425778288661757952"],
-        ["Poly Bridge","425778516320059392"],
-        ["DiRT 3 Complete Edition","425778620187803658"],
-        ["Goat Simulator","425778678723510302"],
-        ["Risk of Rain","425779272842608670"],
-        ["BombTag","425779854332657694"],
-        ["Miscreated","425779909835751424"],
-        ["theHunter Classic","425781960317861888"],
-        ["Cortex Command","425787524737269770"],
-        ["METAL GEAR SURVIVE BETA","425800674568044575"],
-        ["Block N Load","426524547177512960"],
-        ["Lethal League","426524717919240202"],
-        ["Sniper Elite 4","426524936060928011"],
-        ["Endless Space 2","426524963583950868"],
-        ["Dead Maze","426524991379603458"],
-        ["World of Warcraft Public Test","426525131276550144"],
-        ["Sniper Elite 3","426525148892495882"],
-        ["Magicka","426525158627606568"],
-        ["Street Fighter V","426525250549973022"],
-        ["Dead Space™","426525408666583050"],
-        ["Superflight","426525741702709258"],
-        ["The Witcher 2: Assassins of Kings Enhanced Edition","426525754092814346"],
-        ["Spintires","426525833281404928"],
-        ["Blood and Bacon","426526253294551046"],
-        ["Car Mechanic Simulator 2018","426526355564265479"],
-        ["Dragon's Dogma: Dark Arisen","426526490042302464"],
-        ["Project Zomboid","426526722322726912"],
-        ["Hero Siege","426526773694431233"],
-        ["POSTAL 2","426527481122521098"],
-        ["SNOW","426527534268809226"],
-        ["Real Pool 3D - Poolians","426528563919978496"],
-        ["Bloons TD5","426528712348139520"],
-        ["Deus Ex: Mankind Divided™","426529450910547968"],
-        ["Keep Talking and Nobody Explodes","426531471520563211"],
-        ["Age of Mythology: Extended Edition","427033332065370132"],
-        ["F1 2015","427304691903365120"],
-        ["Overcooked","428052640740540416"],
-        ["The Witcher: Enhanced Edition","428052689641930752"],
-        ["PickCrafter","428052738140798976"],
-        ["Need for Speed™ Most Wanted","428052828242706433"],
-        ["Just Survive","428053249120010241"],
-        ["One Finger Death Punch","428053322000367616"],
-        ["The Elder Scrolls: Legends","428053383178354688"],
-        ["Pit People","428053560304074752"],
-        ["Magic Duels","428053651932577792"],
-        ["STAR WARS™ Knights of the Old Republic™ II: The Sith Lords™","428053722300416010"],
-        ["Tree of Savior (English Ver.)","428053768630960128"],
-        ["Toribash","428054001502650368"],
-        ["STAR WARS™ Jedi Knight: Jedi Academy™","428054061502300160"],
-        ["Deep Rock Galactic","428054228511227914"],
-        ["Stranded Deep","428054462892867614"],
-        ["Hunt: Showdown (Test Server)","428054629146951691"],
-        ["Eco","428055174905331712"],
-        ["Hide and Shriek","428055329004191744"],
-        ["APB Reloaded","428055627030331402"],
-        ["Call of Duty: Black Ops","428055652162732032"],
-        ["Prey","428055981650608128"],
-        ["Metro Conflict: The Origin","428056164698423296"],
-        ["Spelunky","428056413806395392"],
-        ["Medieval II: Total War","428057046701572106"],
-        ["Magicka 2","428057934983987200"],
-        ["UNO","428058887334264832"],
-        ["Nioh: Complete Edition","428059098882506752"],
-        ["Warhammer 40,000: Dawn of War III","428060042248454144"],
-        ["Fortnite","432980957394370572"],
-        ["Unleash","437391104804126720"],
-        ["Estranged: The Departure","443136903814971445"],
-        ["Archeage","443155983670312969"],
-        ["WAKFU","443155990414622730"],
-        ["Microsoft Flight Simulator X: Steam Edition","443156007544160276"],
-        ["Darwin Project","443156037130780692"],
-        ["Mitos.is: The Game","443156048992403456"],
-        ["Genital Jousting","443156066562473993"],
-        ["Universe Sandbox","443156067434889236"],
-        ["Aura Kingdom","443156075399872522"],
-        ["Far Cry 5","443156340454457344"],
-        ["The Darkness II","443156342115663882"],
-        ["STAR WARS™ Empire at War: Gold Pack","443156343227023370"],
-        ["BLOCKADE 3D","443156392874868767"],
-        ["MINDNIGHT","443156444351561738"],
-        ["Zombie Panic! Source","443156570847838218"],
-        ["Just Cause™ 3: Multiplayer Mod","443156876931235840"],
-        ["SimCity™","443157047157194772"],
-        ["Frostpunk","443157248710148117"],
-        ["Hurtworld","443157375260688395"],
-        ["Modern Combat Versus","443157946357252116"],
-        ["Quantum Break","443158005798928384"],
-        ["The Jackbox Party Pack 3","443158085247303690"],
-        ["Tropico 5","443158178083897375"],
-        ["Radical Heights","443158281624617000"],
-        ["My Summer Car","443158342026788884"],
-        ["Spec Ops: The Line","443158504719646739"],
-        ["Friday the 13th: Killer Puzzle","443158817983692820"],
-        ["Verdun","443159293538205697"],
-        ["World of Guns: Gun Disassembly","443159499512086539"],
-        ["No Man's Sky","443159611479031808"],
-        ["Ylands","443159628185075722"],
-        ["RESIDENT EVIL 7 biohazard / BIOHAZARD 7 resident evil","443160369192632330"],
-        ["BATTLETECH","443160562088673285"],
-        ["Super Hexagon","443161212969156608"],
-        ["PixARK","443165450424156160"],
-        ["Spiral Knights","443168429990477844"],
-        ["Satellite Reign","443198577687134218"],
-        ["Pillars of Eternity","443198850119892992"],
-        ["Conan Exiles","443524051999260672"],
-        ["TrackMania² Stadium","444200321179451412"],
-        ["Need for Speed™","444540143890726940"],
-        ["Day of Defeat: Source","444720426934075393"],
-        ["Dungeon of the Endless","444853958977126400"],
-        ["Endless Legend","445329750819602433"],
-        ["DEEP SPACE WAIFU","445783564257067008"],
-        ["Surviving Mars","445996079352250368"],
-        ["Dragon Age™: Inquisition","446061700496621578"],
-        ["Mass Effect™: Andromeda","446061836807307301"],
-        ["CrossFire","446061929283321856"],
-        ["Toontown Rewritten","446062074842447909"],
-        ["Survarium","446062275925770270"],
-        ["Plants vs Zombies GW2","446063035057045534"],
-        ["Project64","446063198198693898"],
-        ["Armored Warfare","446063355594145823"],
-        ["The Expendabros","446069736250277888"],
-        ["Mount Your Friends","446105070057029663"],
-        ["Project CARS 2","446380370733039616"],
-        ["Shakes and Fidget","447038538383622145"],
-        ["SAS: Zombie Assault 4","447184346252836864"],
-        ["Awesomenauts","447488337519968257"],
-        ["Yume Nikki","447509870510473216"],
-        ["Holdfast: Nations At War","447728433037049876"],
-        ["Learn to Fly 3","447743861549432833"],
-        ["Stories: The Path of Destinies","448044587580260363"],
-        ["Layers of Fear","448120144775086080"],
-        ["Star Trek Online","448384255131779073"],
-        ["Minion Masters","448417850466762753"],
-        ["Warhammer 40,000: Dawn of War - Soulstorm","448448339386695690"],
-        ["Ultimate Epic Battle Simulator","448537306345898014"],
-        ["TerraTech","448560544778289152"],
-        ["AirMech Strike","448622851386376202"],
-        ["Spintires: MudRunner","448910307969204236"],
-        ["Alien Swarm","449531408730423296"],
-        ["Hacknet","449639683740270612"],
-        ["Quake Champions","449682899596214283"],
-        ["Iron Snout","449684687011708928"],
-        ["DARK SOULS™: REMASTERED","449738622619353088"],
-        ["Raft","449806905901056012"],
-        ["Dungreed","449885746799575040"],
-        ["Grand Theft Auto IV","450005834672373760"],
-        ["Synergy","450021409700446208"],
-        ["Wizard of Legend","450024058348634112"],
-        ["Kritika Online","450129940051001354"],
-        ["Mirror's Edge","450145899063017492"],
-        ["Car Mechanic Simulator 2015","450273108859813888"],
-        ["Double Action: Boogaloo","450292948911915008"],
-        ["STAR WARS™: Knights of the Old Republic™","450293931301666826"],
-        ["The Stanley Parable","450401603669721089"],
-        ["Tyranny","450668558465368074"],
-        ["Empyrion - Galactic Survival","450804667748843520"],
-        ["Bless Online","451132630390538270"],
-        ["60 Seconds!","451336909831012383"],
-        ["The Escapists","451429730416197669"],
-        ["Dauntless","451468933057347603"],
-        ["Dragon Age: Origins - Ultimate Edition","451538960305618952"],
-        ["Total War Saga: Thrones of Britannia","451539017381576704"],
-        ["OKAMI HD / 大神 絶景版","451539083966283776"],
-        ["AdVenture Communist","451539129973604352"],
-        ["Governor of Poker 3","451539151678865409"],
-        ["Worms Revolution","451539172763762688"],
-        ["L.A. Noire","451539180682739732"],
-        ["The Elder Scrolls III: Morrowind","451539197044719616"],
-        ["Armello","451539293173841949"],
-        ["NBA 2K18","451539322965852185"],
-        ["MechWarrior Online","451539349142634496"],
-        ["Resident Evil 5 / Biohazard 5","451539402896703490"],
-        ["House Flipper","451539472610492426"],
-        ["Sleeping Dogs: Definitive Edition","451539490574434315"],
-        ["FINAL FANTASY VII","451539606207463424"],
-        ["Heroes of Hammerwatch","451539639811964928"],
-        ["Youtubers Life","451539649656127488"],
-        ["resident evil 4 / biohazard 4","451539772037398560"],
-        ["State of Decay: Year-One","451539805860528128"],
-        ["Argo","451539926417408000"],
-        ["ESEA","451539971283877888"],
-        ["Zombie Army Trilogy","451539976908439552"],
-        ["Call of Duty: Modern Warfare 3","451539986144296969"],
-        ["Horizon Source","451540115437912064"],
-        ["Yet Another Zombie Defense","451540166037995532"],
-        ["CPUCores :: Maximize Your FPS","451540177131798541"],
-        ["Wargame: Red Dragon","451540284006858772"],
-        ["Resident Evil 6 / Biohazard 6","451540292458512394"],
-        ["CastleMiner Z","451540363941904385"],
-        ["The Lord of the Rings Online™","451540469470593024"],
-        ["For The King","451540626270584833"],
-        ["Just Cause 2","451540656494477312"],
-        ["Gigantic","451540746592321536"],
-        ["Dawn of War II - Retribution","451540774530711572"],
-        ["Paint the Town Red","451540782785101834"],
-        ["Black Mesa","451540911172747284"],
-        ["Vindictus","451541058497675294"],
-        ["Batman: Arkham City GOTY","451541064545861632"],
-        ["Night in the Woods","451541089912881162"],
-        ["Door Kickers","451541104643538944"],
-        ["WARMODE","451541174877159430"],
-        ["Sniper Ghost Warrior 2","451541277935140874"],
-        ["Battlefield: Bad Company 2","451541573742755850"],
-        ["LIMBO","451541581778911262"],
-        ["HELLDIVERS™","451541695771967508"],
-        ["Teeworlds","451541853418815498"],
-        ["Moonbase Alpha","451541936872882186"],
-        ["McOsu","451541958268157952"],
-        ["Loading Screen Simulator","451542208257064961"],
-        ["STAR WARS™ Republic Commando","451542291635503124"],
-        ["The Lab","451542394857455638"],
-        ["Citra","451542523219935272"],
-        ["Sword Art Online: Fatal Bullet","451542793513598996"],
-        ["Bit Heroes","451542845703061524"],
-        ["Orcs Must Die! 2","451543160057888778"],
-        ["DC Universe Online","451543277385023488"],
-        ["GUILTY GEAR Xrd -REVELATOR-","451543838847139850"],
-        ["Battle Royale Trainer","451543838989746186"],
-        ["Rise of Nations: Extended Edition","451543839665160232"],
-        ["The Jackbox Party Pack 2","451543877111775247"],
-        ["Aion","451543892358201393"],
-        ["Alien: Isolation","451543893050261504"],
-        ["Sins of a Solar Empire: Rebellion","451543958611427328"],
-        ["DRAGON BALL XENOVERSE","451543960167514112"],
-        ["Supreme Commander: Forged Alliance","451543961207701534"],
-        ["Spellsworn","451544008737423360"],
-        ["Mass Effect™ 3","451544148617592832"],
-        ["SUPERHOT VR","451544150756556810"],
-        ["Black Desert Online SA","451544197632229376"],
-        ["Grand Theft Auto: Vice City","451544294432702474"],
-        ["Digimon Masters Online","451544305509859328"],
-        ["Mirror's Edge™ Catalyst","451544331287789568"],
-        ["ANNO 2070","451544339416481828"],
-        ["Life is Feudal: MMO","451544345699549194"],
-        ["Faeria","451544379908423680"],
-        ["Everlasting Summer","451544422711033856"],
-        ["Dark and Light","451544430025900062"],
-        ["Steel Division: Normandy 44","451544463941304350"],
-        ["Amnesia: A Machine for Pigs","451544639674253322"],
-        ["RWBY: Grimm Eclipse","451544645852332032"],
-        ["DmC Devil May Cry","451544650009018368"],
-        ["Supreme Commander 2","451544676458037258"],
-        ["Deus Ex: Human Revolution - Director's Cut","451544688713793536"],
-        ["FreeStyle 2: Street Basketball","451544694267183104"],
-        ["Furi","451544694598533120"],
-        ["Ultra Street Fighter IV","451544694917169162"],
-        ["RIFT","451544729763446784"],
-        ["OneShot","451544770876145664"],
-        ["High Octane Drift","451544776895103006"],
-        ["RUINER","451544819555237888"],
-        ["PHANTASY STAR ONLINE 2","451544889331679242"],
-        ["Sword With Sauce: Alpha","451544945984012288"],
-        ["Mass Effect™","451544965542182942"],
-        ["Turmoil","451545009938759710"],
-        ["Worms Armageddon","451545039139766272"],
-        ["Pillars of Eternity II: Deadfire","451545069326041099"],
-        ["PC Building Simulator","451545070739652608"],
-        ["Streets of Rogue","451545147361067008"],
-        ["Hitman: Absolution","451545240264769547"],
-        ["Football Manager 2017","451545279154487306"],
-        ["Atlas Reactor","451545283784998934"],
-        ["Max Payne 3","451545305201246208"],
-        ["S.T.A.L.K.E.R.: Shadow of Chernobyl","451545336218124289"],
-        ["Rec Room","451545342987468800"],
-        ["My Time At Portia","451545373740367881"],
-        ["Lost Castle","451545409253408768"],
-        ["Soda Dungeon","451545721036996619"],
-        ["Fallout 3","451545729253638144"],
-        ["RUNNING WITH RIFLES","451545786946289664"],
-        ["Emily is Away","451545806806319104"],
-        ["Tactical Monsters Rumble Arena","451545859830710272"],
-        ["PAYDAY: The Heist","451546040382914567"],
-        ["Brick Rigs","451546081243824131"],
-        ["Star Conflict","451546138999390208"],
-        ["AdventureQuest 3D","451546156024201217"],
-        ["Bayonetta","451546169685049344"],
-        ["Boring Man - Online Tactical Stickman Combat","451546227696205844"],
-        ["Mass Effect™ 2","451546229252554752"],
-        ["Shadow Warrior 2","451546331639709706"],
-        ["DARK SOULS™ II","451546403764830218"],
-        ["Empire: Total War","451546468763959326"],
-        ["Burnout Paradise: The Ultimate Box","451546473801187348"],
-        ["Supraball","451546491866316800"],
-        ["Desolate","451546514775474195"],
-        ["Arma 2: Operation Arrowhead","451546514943377438"],
-        ["MU Legend","451546558706614292"],
-        ["House Party","451546699177918464"],
-        ["Relic Hunters Zero","451546725606359050"],
-        ["EverQuest","451546783668109322"],
-        ["WildStar","451546896167731220"],
-        ["Spooky's Jump Scare Mansion","451546955513069594"],
-        ["S.T.A.L.K.E.R.: Call of Pripyat","451547035104051200"],
-        ["Forts","451547094121971712"],
-        ["Heroes of Newerth","451547098916192284"],
-        ["Osiris: New Dawn","451547204340023296"],
-        ["Shadow Warrior","451547262418419712"],
-        ["America's Army: Proving Grounds","451547323596537866"],
-        ["AION Free-to-Play","451547384975982602"],
-        ["Stronghold Crusader 2","451547401594077184"],
-        ["Owlboy","451547470967865345"],
-        ["Reigns","451547889982898176"],
-        ["Zula Online","451547924531249152"],
-        ["Tales of Berseria","451548231223214080"],
-        ["Shooty Skies","451548290740387850"],
-        ["HunieCam Studio","451548751010725888"],
-        ["Bomber Crew","451548752046587915"],
-        ["Line of Sight","451548957361831946"],
-        ["S.K.I.L.L. - Special Force 2","451549001511075860"],
-        ["Mini Metro","451549165361823769"],
-        ["ORION: Prelude","451549177885753345"],
-        ["Tricky Towers","451549293946470400"],
-        ["Surgeon Simulator","451549334320971776"],
-        ["The Jackbox Party Pack 4","451549336996806676"],
-        ["Contagion","451549440734658560"],
-        ["SimplePlanes","451549534993252362"],
-        ["RPG Maker MV","451549964422873088"],
-        ["FEZ","451550717673472030"],
-        ["Five Nights at Freddy's","451550771193053194"],
-        ["Injustice™ 2","451551201604141056"],
-        ["Eternal Card Game","451551225968853012"],
-        ["CarX Drift Racing Online","451551359393595412"],
-        ["The Evil Within 2","451551873581711360"],
-        ["Death Road to Canada","451551950937260032"],
-        ["Totally Accurate Battle Zombielator","451551980108906496"],
-        ["Mount & Blade: With Fire and Sword","451552014883880980"],
-        ["Secret World Legends","451552107825201152"],
-        ["Victoria II","451552374423552000"],
-        ["Call to Arms","451552458083270676"],
-        ["Mirror","451552550446170113"],
-        ["LEGO® Star Wars™: The Complete Saga","451552771045457920"],
-        ["Just Fishing","451553376803487744"],
-        ["Domina","451553701404999700"],
-        ["Quake Live","451553710275821568"],
-        ["Orcs Must Die!","451554260262322176"],
-        ["Loadout","451555691836997643"],
-        ["Farming Simulator 15","451556128992657418"],
-        ["Rome: Total War","451557091279372298"],
-        ["Fallout 4 VR","451557388504530945"],
-        ["Magicite","451559209893363712"],
-        ["Bully: Scholarship Edition","451560105008431124"],
-        ["Nidhogg","451561653570502656"],
-        ["Black Survival","451561708461359124"],
-        ["FORTIFY","451563408794320906"],
-        ["Avorion","451563448015519744"],
-        ["Serious Sam 3: BFE","451564621422395392"],
-        ["Gold Rush: The Game","451564928868941824"],
-        ["The Red Solstice","451565617162747904"],
-        ["Ni no Kuni™ II: Revenant Kingdom","451572281584648202"],
-        ["Rock of Ages 2","451584845898842112"],
-        ["Skyforge","451598719498846218"],
-        ["Meteor 60 Seconds!","451604801248034836"],
-        ["Yu-Gi-Oh! Legacy of the Duelist","451686854597672970"],
-        ["Beat Saber","451991967149195264"],
-        ["SpellForce 3","452001740431163402"],
-        ["Titan Quest Anniversary Edition","452029545843785730"],
-        ["SEGA Mega Drive & Genesis Classics","452099265230274571"],
-        ["PUBG: Test Server","452140668265955339"],
-        ["Overgrowth","452205639347994656"],
-        ["Dream Daddy: A Dad Dating Simulator","452206598283198504"],
-        ["Kingdoms of Amalur: Reckoning™","452276290385346589"],
-        ["Star Citizen","452295596917784577"],
-        ["Need for Speed: Hot Pursuit","452295877978095646"],
-        ["Battlefield™ Hardline","452296074762256393"],
-        ["World of Warplanes","452296290940878848"],
-        ["Train Simulator","452313101539475456"],
-        ["Tiger Knight","452944801952694282"],
-        ["Ball 3D: Soccer Online","453374517864169477"],
-        ["Passpartout: The Starving Artist","453677781511831572"],
-        ["Monster Prom","453680460304875531"],
-        ["Totally Accurate Battlegrounds","453818237508124692"],
-        ["Vampyr","454123972343365652"],
-        ["Outlast 2","454411001492668417"],
-        ["Portal Knights","454600052904820736"],
-        ["Fortified","454713992322220032"],
-        ["TOXIKK","454731115027103759"],
-        ["Battle Carnival","454759028187463700"],
-        ["iRacing","454810317705314334"],
-        ["FarCry 4","454811906230845440"],
-        ["Celeste","454814894596816907"],
-        ["Audiosurf","455442346558095370"],
-        ["Baldur's Gate: Enhanced Edition","455494486089269258"],
-        ["Sid Meier's Civilization III: Complete","455584343792943104"],
-        ["Warhammer 40,000: Inquisitor - Martyr","455692385268269056"],
-        ["MONMUSU","455713051794997249"],
-        ["Little Nightmares","455788266860445696"],
-        ["RollerCoaster Tycoon: Deluxe","455864514185920523"],
-        ["Halo Wars: Definitive Edition","456022848214138884"],
-        ["Jurassic World Evolution","456144990930862086"],
-        ["Defiance","456294192616964096"],
-        ["Thief","456834047730122752"],
-        ["From The Depths","456965807780397076"],
-        ["A Story About My Uncle","457095132119040020"],
-        ["Moonlighter","457269337137348613"],
-        ["Pirate101","457283942475759662"],
-        ["Dreadnought","457284340330659864"],
-        ["Napoleon: Total War","457284624977100800"],
-        ["Alliance of Valiant Arms","457284796658352128"],
-        ["Arpiel Online","457299794772230154"],
-        ["ManiaPlanet","457300140470960128"],
-        ["마비노기 영웅전","457300488199733265"],
-        ["Lineage II","457300834393391104"],
-        ["MapleStory 2","457301027453009947"],
-        ["PPSSPP","457301373592141836"],
-        ["Command & Conquer™: Generals and Zero Hour","457301510515195924"],
-        ["NoxPlayer","457301824110723113"],
-        ["Tribes: Ascend","457549567538495489"],
-        ["Medieval Engineers","457619737535447060"],
-        ["Cuisine Royale","457888043668340737"],
-        ["Witch It","458081878394667009"],
-        ["GRID 2","458309189974884363"],
-        ["Mark of the Ninja","458503484153528322"],
-        ["Nomad","458780333601587200"],
-        ["GORN","459465853600268289"],
-        ["Unreal Gold","459581070438825994"],
-        ["Shadowrun Returns","459713656339562503"],
-        ["Space Hulk: Deathwing - Enhanced Edition","459764260935958538"],
-        ["Colony Survival","459774120226455562"],
-        ["Murder Miners","459807786151182346"],
-        ["GOD EATER 2 Rage Burst","459968630935781376"],
-        ["Aimtastic","460092747580309504"],
-        ["Tom Clancy's The Division Trial","460199128522293258"],
-        ["Call of Duty: Infinite Warfare","460217112250810368"],
-        ["Transistor","460299285049901056"],
-        ["LEGO® MARVEL Super Heroes","460450424940396544"],
-        ["Salt and Sanctuary","460472377566822400"],
-        ["Transport Fever","460542812124086272"],
-        ["EARTH DEFENSE FORCE 4.1  The Shadow of New Despair","460598317173309452"],
-        ["The Crew 2","460639482547273749"],
-        ["Titan Souls","460691329752629248"],
-        ["METAL GEAR RISING: REVENGEANCE","460788999880179722"],
-        ["Next Day: Survival","460831278799912960"],
-        ["Robot Roller-Derby Disco Dodgeball","460909130140614656"],
-        ["King of the Hat","460940655984771072"],
-        ["Life is Feudal: Your Own","460951106357297172"],
-        ["Blood Bowl 2","460987469756629005"],
-        ["Poker Night 2","461039002796032000"],
-        ["Five Nights at Freddy's 2","461050695198572554"],
-        ["The Awesome Adventures of Captain Spirit","461256067003973633"],
-        ["Freeman: Guerrilla Warfare","461302775284891648"],
-        ["Hammerwatch","461404096751206420"],
-        ["RollerCoaster Tycoon 3: Platinum!","461439083894407178"],
-        ["Jalopy","461561181598121984"],
-        ["Ultimate Custom Night","461673633798946816"],
-        ["Fable Anniversary","461711977727918080"],
-        ["Pavlov VR","461758710088466432"],
-        ["Styx: Shards of Darkness","462296460512198656"],
-        ["Audiosurf 2","462407650941075456"],
-        ["Slap City","462788623675162634"],
-        ["Natural Selection 2","462817604202004480"],
-        ["To the Moon","462829880615370762"],
-        ["Devil May Cry® 4 Special Edition","463227448167890944"],
-        ["The Evil Within","463274972958425098"],
-        ["Lords Of The Fallen","463425384893906944"],
-        ["Five Nights at Freddy's: Sister Location","463603236880908297"],
-        ["fin-dev","463761561685721088"],
-        ["The Jackbox Party Pack","463963734507782144"],
-        ["NEKOPARA Vol. 1","464273275904589834"],
-        ["Grand Theft Auto III","464434670646460427"],
-        ["Worlds Adrift","464507152111763457"],
-        ["We Were Here Too","464823241098395674"],
-        ["Farm Together","464830344558805002"],
-        ["Vampire: The Masquerade - Bloodlines","464956888656773150"],
-        ["Stoneshard: Prologue","465087252574371850"],
-        ["Cook, Serve, Delicious! 2!!","465247704155553792"],
-        ["Warhammer 40,000: Dawn of War - Dark Crusade","465536900560584714"],
-        ["FINAL FANTASY X/X-2 HD Remaster","465985864095367178"],
-        ["Longshot [Dev]","466240509682384896"],
-        ["Heavy Metal Machines","466296927944835082"],
-        ["SOS","466334957183303710"],
-        ["Wreckfest","466457842401148948"],
-        ["Card Hunter","466640524670009354"],
-        ["Gear Up","466685661806592000"],
-        ["Amorous","466691613138354196"],
-        ["Pixel Worlds","466733503720062996"],
-        ["Starbound","467102538278109224"],
-        ["Montaro","467286012104671232"],
-        ["LawBreakers","467724362674470912"],
-        ["Hot Dogs, Horseshoes & Hand Grenades","467788345565511690"],
-        ["RollerCoaster Tycoon 2: Triple Thrill Pack","467979045179752448"],
-        ["Crash Bandicoot™ N. Sane Trilogy","468099355962900480"],
-        ["Islands of Nyne: Battle Royale","468254179987685406"],
-        ["Rules Of Survival","468577647392456714"],
-        ["Age of Wonders III","468606521433915404"],
-        ["SINNER","468611186330566677"],
-        ["S.T.A.L.K.E.R.: Clear Sky","469153997027016714"],
-        ["Russian Fishing 4","469213224215248896"],
-        ["Omensight","469278650936721428"],
-        ["Sundered","469280323109257228"],
-        ["Project Highrise","469288321814757402"],
-        ["Crookz - The Big Heist","469288750019641365"],
-        ["System Shock: Enhanced Edition","469292352893222942"],
-        ["The Metronomicon: Slay The Dance Floor","469292858701119508"],
-        ["Dungeons 2","469293209214910504"],
-        ["Tropico 4","469293612207833089"],
-        ["Red Faction Guerrilla Re-Mars-tered","469429746007015426"],
-        ["Hellbound: Survival Mode","469564278853206025"],
-        ["MAD MACHINES","469807750084296716"],
-        ["METAL GEAR SOLID V: GROUND ZEROES","469944923928657939"],
-        ["Bloody Trapland","469959314183028736"],
-        ["Worm.is: The Game","469989584277602304"],
-        ["Cossacks 3","470220034237530112"],
-        ["Guild Wars","470282452674412564"],
-        ["The Sims 2: Ultimate Collection","470283475660963850"],
-        ["Dragon Age: Origins","470283661414105131"],
-        ["Project Rhombus","470399665154686986"],
-        ["Climb","470810047547572244"],
-        ["Command and Conquer: Red Alert 3","470958640031989761"],
-        ["Clone Drone in the Danger Zone","471192232985231370"],
-        ["This Is the Police 2","471357631697780774"],
-        ["Darksiders III","471358881348452352"],
-        ["Dead Rising 3","471760010016194570"],
-        ["Dino D-Day","472197780836974604"],
-        ["Banner Saga 3","472228397020479488"],
-        ["War Robots","472823716062167050"],
-        ["MOBIUS FINAL FANTASY","472837297063067658"],
-        ["Democracy 3","473064732807528458"],
-        ["Poker Night at the Inventory","473440891110162440"],
-        ["Momodora: Reverie Under the Moonlight","473594880673972224"],
-        ["Arizona Sunshine","473969782085910558"],
-        ["de Blob","474014437863587870"],
-        ["de Blob 2","474015113964290048"],
-        ["Kenshi","474081029490081792"],
-        ["140","474298936228708372"],
-        ["RaceRoom Racing Experience","474431535291039754"],
-        ["Stronghold Crusader HD","474975575409295380"],
-        ["Sniper Ghost Warrior 3","475006595814785024"],
-        ["Motorsport Manager","475034058066493441"],
-        ["Beholder","475039384358617098"],
-        ["BlazBlue Cross Tag Battle","475495343182577675"],
-        ["Warhammer 40,000: Dawn of War - Game of the Year Edition","475821838782693387"],
-        ["Feed and Grow: Fish","475913332478443530"],
-        ["Punch Club","476271278836285440"],
-        ["Half dead","476349443474718730"],
-        ["Worms W.M.D","476482983675559946"],
-        ["Pyre","476907979069849620"],
-        ["MONSTER HUNTER: WORLD","477152881196269569"],
-        ["Among Us","477175586805252107"],
-        ["Viridi","477520549833211915"],
-        ["Offworld Trading Company","477657966095630346"],
-        ["West of Loathing","478014121065840650"],
-        ["The Ultimate DOOM","478613204323270666"],
-        ["Last Year: The Nightmare","478637764565401630"],
-        ["Rampage Knights","478646014841061416"],
-        ["Yakuza 0","478764846951825418"],
-        ["Rend","478866361544605698"],
-        ["Overcooked! 2","479169486583496704"],
-        ["Fallout 2","479334869462417409"],
-        ["DEATHGARDEN","479694330441891840"],
-        ["RAGE","479735703140433940"],
-        ["Orwell","479821376975405066"],
-        ["Time Clickers","479894252726517760"],
-        ["Prominence Poker","480167738334248980"],
-        ["Wrecked","480316289307639808"],
-        ["Paintball War","480363777574043658"],
-        ["Post Scriptum","480560735521341440"],
-        ["Crawl","480573996509954078"],
-        ["Danganronpa: Trigger Happy Havoc","480963716934795264"],
-        ["911 Operator","481103865559908372"],
-        ["How to Survive 2","481505570747318292"],
-        ["Dead Rising 2","481570202988052490"],
-        ["Graveyard Keeper","481816401183506432"],
-        ["Shower With Your Dad Simulator 2015: Do You Still Shower With Your Dad","481999402630774794"],
-        ["Valkyria Chronicles™","482176854938353674"],
-        ["Hot Lava","482730443037212673"],
-        ["SimCity 4 Deluxe","482776230895288320"],
-        ["BROKE PROTOCOL: Online City RPG","483247042689368084"],
-        ["We Need to Go Deeper","483361121269710858"],
-        ["Roguelands","483421234391154698"],
-        ["UNO Demo","484310169145180160"],
-        ["SCUM","484425151631589378"],
-        ["The Witcher Enhanced Edition Director's Cut","484451241825533962"],
-        ["STAR WARS Rebellion","484475041711521830"],
-        ["Call of War","484486787952148485"],
-        ["Battle for Wesnoth","484526083686006810"],
-        ["LISA","484572816977428490"],
-        ["Warhammer 40,000: Space Marine","484789228761514004"],
-        ["Insurgency: Sandstorm","484892481452769290"],
-        ["Onward","484938446268268564"],
-        ["Two Point Hospital","485224436187004928"],
-        ["Talisman: Digital Edition","485857105278926848"],
-        ["Gunpoint","486705198576828416"],
-        ["Call of Duty 4: Modern Warfare","486763816944795658"],
-        ["Dead Frontier 2","487074862565818378"],
-        ["Stronghold Crusader Extreme HD","487328146438356992"],
-        ["Throne of Lies","487330866830376960"],
-        ["Bad North","487564993236172802"],
-        ["Hunger Dungeon","487652330989158410"],
-        ["The Dig®","487683851519393822"],
-        ["Deus Ex: Game of the Year Edition","488014835389300736"],
-        ["Galactic Civilizations II: Ultimate Edition","488380884337295360"],
-        ["Stick Fight: The Game","488693576314650634"],
-        ["Sid Meier's Civilization® IV Complete","488844250251788339"],
-        ["XCOM Enemy Unknown","488856269382483979"],
-        ["Dungeon Defenders","488858705836900355"],
-        ["NBA 2K17","489276682566369290"],
-        ["Hyperdimension Neptunia Re;Birth1","489332841910632458"],
-        ["sZone-Online","489441787778301992"],
-        ["Resident Evil Revelations 2 / Biohazard Revelations 2","489648352892289054"],
-        ["Trine Enchanted Edition","489705172453425173"],
-        ["Trine 3: The Artifacts of Power","489715273683697674"],
-        ["Trine 2: Complete Story","489715841789853697"],
-        ["Job Simulator","489832887936483338"],
-        ["FIFA 16","489854965787918376"],
-        ["Construction-Simulator 2015","489879126925115392"],
-        ["Seasons After Fall","489916817146511371"],
-        ["Wasteland 2: Director's Cut","489917055282315274"],
-        ["Shadows: Heretic Kingdoms","489917480274362368"],
-        ["System Shock 2","489917602412494878"],
-        ["Shadow of the Tomb Raider","490260586899177491"],
-        ["ONRAID","490611188988772367"],
-        ["Call of Duty Black Ops 4","490913233667096576"],
-        ["Simply Chess","491048607072387072"],
-        ["Chaos Reborn","491200852149796865"],
-        ["Broken Age","491424584168505354"],
-        ["Dangerous Waters","491425013468102657"],
-        ["Disciples II: Gallean's Return","491425405681664037"],
-        ["Disciples Sacred Lands Gold","491425800059486208"],
-        ["FlatOut 2","491426078137647104"],
-        ["FlatOut: Ultimate Carnage","491426256789831690"],
-        ["Fleet Command","491426408384561160"],
-        ["Space Empires IV Deluxe","491426627394338846"],
-        ["Sub Command","491426844604760120"],
-        ["Masters of Anima","491427069734027273"],
-        ["Pony Island","491427187442974749"],
-        ["VVVVVV","491427544134975498"],
-        ["Guacamelee! Super Turbo Championship Edition","491427940135993364"],
-        ["The End Is Nigh","491739802870349883"],
-        ["TowerFall Ascension","491740193116782595"],
-        ["DRAGON QUEST® XI: Echoes of an Elusive Age™","491806530576842762"],
-        ["Regular Human Basketball","491853507507388427"],
-        ["F1 2018","491909189086740480"],
-        ["Never Split the Party","492054902772727808"],
-        ["The Wolf Among Us","492110850342125591"],
-        ["Brothers - A Tale of Two Sons","492112259770875921"],
-        ["ABZU","492113873508368403"],
-        ["Last Day of June","492114663211925536"],
-        ["Cities in Motion","492115461824184320"],
-        ["Darkest Hour: A Hearts of Iron Game","492116330909138974"],
-        ["Europa Universalis III","492117546728816640"],
-        ["Hearts of Iron III","492118503508279316"],
-        ["Majesty Gold HD","492120134937346049"],
-        ["Shadowrun: Dragonfall - Director's Cut","492120767111233566"],
-        ["Torchlight","492121941155643402"],
-        ["STAR WARS™ Republic Commando™","492129256772599837"],
-        ["Oddworld: Stranger's Wrath","492129658536591400"],
-        ["Vegas: Make It Big","492130126012743710"],
-        ["STAR WARS™ Galactic Battlegrounds Saga","492131222135373834"],
-        ["The Walking Dead: The Final Season","492133608493023232"],
-        ["STAR WARS™ Jedi Knight: Dark Forces II","492134139647098881"],
-        ["Yooka-Laylee","492134695711014912"],
-        ["The Secret of Monkey Island™ Special Edition","492134756914429975"],
-        ["STAR WARS™ Jedi Knight II: Jedi Outcast™","492135944179286068"],
-        ["STAR WARS™ Knights of the Old Republic","492136872714305566"],
-        ["Star Wars: Dark Forces","492137508633706517"],
-        ["Ascension: Deckbuilding Game","492140628717731846"],
-        ["Ashes of the Singularity: Escalation","492141568816447488"],
-        ["Ticket to Ride","492142885077123082"],
-        ["Killer Queen Black","492144146040094722"],
-        ["Oddworld: New 'n' Tasty","492146632511586313"],
-        ["Out of the Park Baseball 18","492147626872012800"],
-        ["Tropico 3","492154985627385886"],
-        ["Hearts of Iron II","492158597673910281"],
-        ["Europa Universalis II","492159419837186053"],
-        ["Ring of Elysium","492159553966702592"],
-        ["Victoria I","492161312730775553"],
-        ["Indiana Jones® and the Fate of Atlantis™","492162663976140810"],
-        ["Monkey Island™ 2 Special Edition: LeChuck's Revenge™","492164341840347156"],
-        ["Euro Truck Simulator","492695172967301120"],
-        ["Galactic Civilizations III","492772865175715850"],
-        ["The Culling","493430961313415188"],
-        ["RPG Maker VX Ace","493490198580035604"],
-        ["The Wild Eight","493827668991803402"],
-        ["Warframe Test","494178385807933445"],
-        ["Planetbase","494228479898812416"],
-        ["Aliens vs. Predator","494240845378355220"],
-        ["BlazBlue Centralfiction","494341815940415488"],
-        ["Blacklight: Retribution","495079795252527104"],
-        ["20XX","495310509382565890"],
-        ["Warhammer 40,000: Dawn of War II - Retribution","495651148242616330"],
-        ["Legion TD 2","495691276159549460"],
-        ["Coloring Pixels","495871643432910848"],
-        ["Art of War: Red Tides","495889089703444481"],
-        ["Battlerite Royale","495912170190667776"],
-        ["Rogue Legacy","495979053371752481"],
-        ["Mist Survival","496035345981243395"],
-        ["A Kiss For The Petals - Remembering How We Met","496521775161671734"],
-        ["A Sky Full of Stars","496523213778583553"],
-        ["A Study in Steampunk: Choice by Gaslight","496524367962832918"],
-        ["Action Henk","496524555360403476"],
-        ["Aeon Rivals","496524827050508316"],
-        ["Age of Conan","496525141467987991"],
-        ["AI War: Fleet Command","496525786468319232"],
-        ["Alan Wake's American Nightmare","496526142673649724"],
-        ["Albion Online","496526645671231488"],
-        ["Alien Breed 2: Assault","496527138141503538"],
-        ["Altitude","496529186064826368"],
-        ["Anarchy Online","496529322039836681"],
-        ["ANNO 1404","496530041895911429"],
-        ["Anno 2205","496530253905264659"],
-        ["Antichamber","496532716099993623"],
-        ["Ascent - The Space Game","496533328833544227"],
-        ["Assault Android Cactus","496533560228970514"],
-        ["Astebreed","496533728932134922"],
-        ["Axiom Verge","496534151642742804"],
-        ["Bad Rats","496534375740080128"],
-        ["Bare Metal","496534611250118656"],
-        ["Battle Squares","496534796424708124"],
-        ["Battlefield 2","496534962200248373"],
-        ["Battlefield 2142","496535501465976835"],
-        ["Beat Hazard","496535788427935764"],
-        ["Bejeweled 3","496536236769542154"],
-        ["Bejeweled Blitz","496537107708248064"],
-        ["Blake Stone: Planet Strike","496538565451317259"],
-        ["Block Sport","496538914673262596"],
-        ["Blockland","496539095888035861"],
-        ["Bloodline Champions","496539230026334208"],
-        ["Boid","496539411308216320"],
-        ["Braid","496540068442537984"],
-        ["Bulletstorm","496540681913892864"],
-        ["C9","496543199209193488"],
-        ["CABAL Online","496544716997918750"],
-        ["Call of Duty 2","496546499346432010"],
-        ["Call of Juarez","496547399599390730"],
-        ["Cargo Commander","496547754680647690"],
-        ["Chronicon","496548575061213184"],
-        ["CLANNAD","496550410685906954"],
-        ["CLANNAD Side Stories","496550790572277770"],
-        ["Clive Barker's Undying","496552265977692181"],
-        ["Clonk Rage","496552591111618565"],
-        ["Cloudbuilt","496552729141837824"],
-        ["Combat Arms","496553014220554270"],
-        ["Command and Conquer 3: Kane's Wrath","496557233979654154"],
-        ["Company of Heroes","496557687560077322"],
-        ["Cook, Serve, Delicious!","496558661041127444"],
-        ["Creation Kit","496560355615703060"],
-        ["Creeper World 3: Arc Eternal","496560583521468426"],
-        ["Crimsonland","496561007888433152"],
-        ["Crowfall","496561718668034078"],
-        ["CRYPTARK","496562135447502882"],
-        ["Crysis","496562734889041930"],
-        ["Crysis 2","496564403345424431"],
-        ["Crysis 3","496565168528949249"],
-        ["Cyphers","496565866721443840"],
-        ["DarkStar One","496566320213655552"],
-        ["DCS World","496568071713062928"],
-        ["Dead Space 2","496568659276201984"],
-        ["DeadCore","496569001405841439"],
-        ["Deathsmiles","496569185237860359"],
-        ["Debugger 3.16: Hack'n'Run","496569333665759232"],
-        ["Defense Grid 2","496569474670133258"],
-        ["Depression Quest","496569655679385603"],
-        ["Devil Daggers","496571420579463168"],
-        ["Devilian","496571728089317437"],
-        ["Diablo","496571953147150354"],
-        ["Diablo II","496572658255790080"],
-        ["Diadra Empty","496573404002910227"],
-        ["DiRT 3","496574120436432915"],
-        ["Distance","496575580070871040"],
-        ["Dominions 4","496575805413916683"],
-        ["DOOM 3","496575943431946250"],
-        ["Double Dragon Neon","496576235934187539"],
-        ["Downwell","496576457082929152"],
-        ["Dragon Age II","496576882540806154"],
-        ["Dragon Fin Soup","496577154683895827"],
-        ["Dragon Nest","496577285466357760"],
-        ["Dragon's Dogma Online","496578773647622187"],
-        ["Dropzone","496578915263971358"],
-        ["Duke Nukem Forever","496579092418658363"],
-        ["Dungeon Fighter Online","496579303631486976"],
-        ["Dungeonland","496579621693816832"],
-        ["Dungeons & Dragons Online®","496579889063919616"],
-        ["Dust: An Elysian Tail","496580906916511764"],
-        ["Dustforce","496581169639587850"],
-        ["Entropia Universe","496581460438941716"],
-        ["EverQuest II","496582384863412249"],
-        ["Evoland 2","496583339986387004"],
-        ["Evolve","496739105481293869"],
-        ["Fairy Fencer F","496739512446091284"],
-        ["FIFA 15","496740139633213490"],
-        ["Final Fantasy III","496740365072728064"],
-        ["FINAL FANTASY V","496740745085059112"],
-        ["FINAL FANTASY VI","496742764344639488"],
-        ["FINAL FANTASY VIII","496757203596869652"],
-        ["FINAL FANTASY XIII","496757542479724554"],
-        ["FINAL FANTASY XIII-2","496757852069822504"],
-        ["Firefall","496758262797172736"],
-        ["Flamebreak","496758379583242291"],
-        ["Flyff","496758691064709120"],
-        ["Football Manager 2014","496758937039929370"],
-        ["Football Manager 2016","496760317875978256"],
-        ["Forza Horizon 3","496760939052269583"],
-        ["Forza Motorsport 7","496761344603979796"],
-        ["Fran Bow","496761451738955804"],
-        ["Free to Play","496761815548559360"],
-        ["Freedom Planet","496761999708127232"],
-        ["Frontier","496762504291155998"],
-        ["Furcadia","496763066889797674"],
-        ["Gears of War 4","496763396558159892"],
-        ["Granado Espada","496771607386259456"],
-        ["GRAV","496771913280913424"],
-        ["Grey Goo","496772084379418637"],
-        ["scram","496772185864667146"],
-        ["Groove Coaster","496772271088730112"],
-        ["Grow Home","496772402219319316"],
-        ["Guardians of Ember","496772734744002580"],
-        ["GUILTY GEAR XX ACCENT CORE PLUS R","496773998517026816"],
-        ["Guitar Hero World Tour","496774309042192384"],
-        ["Halo Custom Edition","496775885249314885"],
-        ["Halo: Combat Evolved","496776262136758277"],
-        ["Hand of Fate","496776430110113843"],
-        ["Hard West","496776675351330846"],
-        ["Hate Plus","496776818855116811"],
-        ["Hatoful Boyfriend","496777244090302490"],
-        ["HAWKEN","496778224433627156"],
-        ["HEX: Shards of Fate","496778870104653824"],
-        ["Hitman: Blood Money","496779049524265010"],
-        ["Hoshizora no Memoria -Wish upon a Shooting Star-","496779855950774272"],
-        ["ibb & obb","496838264506941473"],
-        ["In Death","496838571735384122"],
-        ["Intruder","496838818813706270"],
-        ["Jade Empire: Special Edition","496839367621476352"],
-        ["Jurassic Park: The Game","496839741812113408"],
-        ["Kindred Spirits on the Roof","496845813461418005"],
-        ["King Arthur's Gold","496845988154048541"],
-        ["Krosmaster Arena","496846515382517770"],
-        ["Landmark","496846777023070218"],
-        ["Lara Croft and the Guardian of Light","496846884787191834"],
-        ["Legend of Dungeon","496847055793422336"],
-        ["LIGHTNING RETURNS: FINAL FANTASY XIII","496847425680572455"],
-        ["Limit Ragnarok Online","496847615456051220"],
-        ["Lineage","496848201773482004"],
-        ["Chris Sawyer's Locomotion","496848465301733376"],
-        ["Long Live The Queen","496848705027178496"],
-        ["Lovely Planet","496851684396630035"],
-        ["Lovers in a Dangerous Spacetime","496851934339268622"],
-        ["Lumini","496852060256337920"],
-        ["LYNE","496852270080851977"],
-        ["Magic Realm: Online","496852479615565834"],
-        ["Marvel Heroes 2015","496852775406141450"],
-        ["Marvel Heroes 2016","496853043103662080"],
-        ["Massive","496853196346621982"],
-        ["Master Reboot","496853347505012746"],
-        ["Nekojishi","497121061339529226"],
-        ["How to Survive","497169068466634792"],
-        ["Pathfinder: Kingmaker","497389403832844298"],
-        ["NEKOPARA Vol. 0","497660949260664832"],
-        ["Necropolis","497830439298400256"],
-        ["Assassin's Creed Odyssey","497898978466070528"],
-        ["Craft The World","498216676744101891"],
-        ["Midair","498457066738810890"],
-        ["CrossCode","498640615744077864"],
-        ["Jotun","498640773999362050"],
-        ["Monster Slayers","498641288250392600"],
-        ["We Happy Few","498728807881113620"],
-        ["Lost Saga North America","498938615934615552"],
-        ["Men of War: Assault Squad","498941421814939648"],
-        ["Might & Magic Heroes VI","498942150042451978"],
-        ["Might & Magic Heroes VII","498942455903944704"],
-        ["MOTHERGUNSHIP","498942846032805908"],
-        ["Mountain","498943265475657728"],
-        ["Mudlet","498943730817171476"],
-        ["Mugen Souls","498943830582755368"],
-        ["NARUTO SHIPPUDEN: Ultimate Ninja STORM 3 Full Burst","498948228146921472"],
-        ["NARUTO SHIPPUDEN: Ultimate Ninja STORM Revolution","498971059291291648"],
-        ["Need for Speed: Carbon","498971474841960450"],
-        ["NEO Scavenger","498971609764200478"],
-        ["Neocron Evolution","498971892968062976"],
-        ["Next Car Game: Wreckfest","498971974945603587"],
-        ["Nicole (otome version)","498972346078461982"],
-        ["Nosgoth","498972985403899960"],
-        ["ONE PIECE PIRATE WARRIORS 3","498973375595675688"],
-        ["ONI","498979842277113857"],
-        ["Peggle Deluxe","498980232938651648"],
-        ["Peggle Extreme","498980339470041123"],
-        ["Pinball Arcade","498980583096057905"],
-        ["Pixel Dungeon","498981118410752020"],
-        ["PixelJunk Shooter Ultimate","498981476050927653"],
-        ["PixelJunk™ Shooter Ultimate","498981634339635253"],
-        ["MechWarrior: Living Legends","498984088418516992"],
-        ["Plants vs. Zombies: Game of the Year","498985095378632704"],
-        ["Poi","498985543586021376"],
-        ["PokeMMO","498985820221603840"],
-        ["PokerStars","498986175512576058"],
-        ["Prepar3D","498986525757800468"],
-        ["Primal Carnage","498986661104058378"],
-        ["Prime World","498986815227822080"],
-        ["ProjectRIK","498987268048945162"],
-        ["Proteus","498987388891299859"],
-        ["Pyrite Heart","498987613416456220"],
-        ["Quake II","498987709629464586"],
-        ["Quiplash","498988229798920242"],
-        ["Race The Sun","498988774169116711"],
-        ["Ragnarok Online","498990766643740692"],
-        ["Rappelz","498991137214955531"],
-        ["Rayman 2 - The Great Escape","498991556724916225"],
-        ["Re-Volt","498994022048727050"],
-        ["Reassembly","498997425965367313"],
-        ["ReCore","498999413172207653"],
-        ["Resident Evil Revelations / Biohazard Revelations","499004687719202816"],
-        ["Hidden Folks","499303420512174080"],
-        ["Tales of Escape","499330427455012874"],
-        ["BLOCKPOST","499743985045078036"],
-        ["Moon Hunters","500645675642388480"],
-        ["Serious Sam 2","500769428753874947"],
-        ["Resident Evil / biohazard HD REMASTER","500804924007907348"],
-        ["The Walking Dead: Season Two","500830174590271509"],
-        ["pla_toon","501063306065346580"],
-        ["Darkwood","501209864333164546"],
-        ["NBA 2K19","501373821886922752"],
-        ["I am Bread","501542797430489098"],
-        ["CreativeDestruction","501792352898121743"],
-        ["Bigscreen Beta","501925376747110440"],
-        ["Fuse","502281428168343573"],
-        ["Sonic Generations","502406586895958026"],
-        ["Zeus' Battlegrounds","502879677782818820"],
-        ["The Misfits","502910350413266954"],
-        ["World War 3","503228350761009162"],
-        ["SOULCALIBUR VI","503340646946308096"],
-        ["Oh...Sir! The Insult Simulator","503362822957432832"],
-        ["Danganronpa 2: Goodbye Despair","503578473227354112"],
-        ["OVERKILL's The Walking Dead - BETA","503632655137374219"],
-        ["Call of Cthulhu","503982482664849408"],
-        ["Asheron's Call","504021888805240914"],
-        ["Reflex Arena","504024478100095016"],
-        ["Retro City Rampage™ DX","504026620068233235"],
-        ["Reus","504027911213285423"],
-        ["Revelation Online","504028382317772859"],
-        ["rFactor","504028685322551296"],
-        ["rFactor 2","504029217650901040"],
-        ["Rogue System","504029616151986198"],
-        ["Sakura Angels","504029936697344048"],
-        ["Sakura Clicker","504030053017845805"],
-        ["Sakura Spirit","504030205481058304"],
-        ["Screencheat","504030375606091776"],
-        ["Scrivener","504030662911590425"],
-        ["Secret Ponchos","504030792184496148"],
-        ["Secrets of Grindea","504030959654535198"],
-        ["Shadowgrounds","504031323443167273"],
-        ["Shadowgrounds: Survivor","504031813619154974"],
-        ["Shadowrun","504032333532364840"],
-        ["Shantae and the Pirate's Curse","504032449173389372"],
-        ["Shattered Skies","504033280149159986"],
-        ["Sid Meier's Railroads!","504033484919144452"],
-        ["SinaRun","504033675940200448"],
-        ["Slime CCG","504037755018412033"],
-        ["Snes9x","504041310605410315"],
-        ["Songbringer","504042287345434624"],
-        ["Sonic Adventure DX","504042667714543626"],
-        ["Sonic Lost World","504044826954694780"],
-        ["Soul Axiom","504046230028943380"],
-        ["Space Pirates and Zombies","504046366302142494"],
-        ["SpaceChem","504046850584739850"],
-        ["Spider-Man 3","504047615139119143"],
-        ["Sprint Vector","504050983400374292"],
-        ["Startup Company","504052120543166505"],
-        ["Steel Ocean","504052334960050176"],
-        ["STEINS;GATE","504052730042646579"],
-        ["Steredenn","504053684494401540"],
-        ["STRAFE","504054126280310794"],
-        ["Strife","504055085177765907"],
-        ["Strife: Veteran Edition","504055223543922708"],
-        ["Styx: Master of Shadows","504055375880912946"],
-        ["Suguri","504055570483904522"],
-        ["Super Monday Night Combat","504055809962147840"],
-        ["Superbrothers: Sword & Sworcery EP","504056145854464000"],
-        ["SURV1V3","504056431176056852"],
-        ["SWAT 4","504056709015404544"],
-        ["Sword Coast Legends","504056938439507968"],
-        ["Sword of Asumi","504057095109214247"],
-        ["SYNTHETIK","504057233756389376"],
-        ["Take On Mars","504057417194143754"],
-        ["Tales from the Borderlands","504057675286315028"],
-        ["Tales of Maj'Eyal","504065891043115008"],
-        ["Tales of Monkey Island","504067053481754634"],
-        ["Tales of Zestiria","504070466948956160"],
-        ["Tales Runner","504071115799265280"],
-        ["Task Force","504071248888987676"],
-        ["Tetris® Ultimate","504071743963529226"],
-        ["Tetris","504071879993196544"],
-        ["The Beginner's Guide","504073562785579018"],
-        ["The Elder Scrolls IV: Oblivion","504074409628401690"],
-        ["The Forgettable Dungeon","504075021677887541"],
-        ["THE KING OF FIGHTERS 2002 UNLIMITED MATCH","504075299877683230"],
-        ["The Marvellous Miss Take","504076592218112047"],
-        ["The Park","504076991759384596"],
-        ["The Sacred Tears TRUE","504077161246883850"],
-        ["The Secret World","504077629175889923"],
-        ["The Settlers 7: Paths to a Kingdom","504078051358015516"],
-        ["The Settlers: Rise of an Empire","504078174875942939"],
-        ["The Vanishing of Ethan Carter","504078553445302330"],
-        ["The Vanishing of Ethan Carter Redux","504078762292543506"],
-        ["There Was a Caveman","504079332512235573"],
-        ["Thomas Was Alone","504079439726903336"],
-        ["TIS-100","504079649702412295"],
-        ["Tomb Raider II","504079864681332739"],
-        ["Tomb Raider III: Adventures of Lara Croft","504080259151298560"],
-        ["Tomb Raider: Anniversary","504080427569643550"],
-        ["Tomb Raider: Chronicles","504080609598111771"],
-        ["Tomb Raider: Legend","504080831396970511"],
-        ["Tomb Raider: The Last Revelation","504081066848681984"],
-        ["Tomb Raider: Underworld","504081253314723874"],
-        ["Tony Hawk's Underground","504081569405730826"],
-        ["Tony Hawk's Underground 2","504081807340470291"],
-        ["Trackday Manager","504082602848813087"],
-        ["TransforBest","504082814350655518"],
-        ["Triple Town","504083025211162677"],
-        ["Unravel","504084141319520299"],
-        ["Unreal Tournament","504084447797313537"],
-        ["Unreal Tournament 3","504084581989744679"],
-        ["Uplink","504085139983433774"],
-        ["War for the Overworld","504085687155425286"],
-        ["Warsow","504086535079985181"],
-        ["WaveLand","504086615132733450"],
-        ["Wings of Vi","504086961498226688"],
-        ["Wolfenstein: The Old Blood","504087375618506772"],
-        ["Wonder Wickets","504087681635188766"],
-        ["X-Plane 11","504087790032650290"],
-        ["Xenonauts","504088140139462686"],
-        ["Zandronum","504088311594483722"],
-        ["ZOMBI","504088792223842314"],
-        ["Zombies Monsters Robots","504089133900103714"],
-        ["9Dragons","504399459426369587"],
-        ["Age of Wushu","504422264599609344"],
-        ["Alan Wake","504423339104796672"],
-        ["Argentum Online","504424067877699614"],
-        ["Azure Striker Gunvolt","504426985305538600"],
-        ["Microsoft Allegiance","504444177413701632"],
-        ["Super House of Dead Ninjas","504468643384524800"],
-        ["Aseprite","504605035162763294"],
-        ["Full Metal Furies","504743823281487882"],
-        ["蒼の彼方のフォーリズム","504764773167136768"],
-        ["Avalon Lords: Dawn Rises","504765148481716224"],
-        ["BlackShot: Mercenary Warfare FPS","504767731825115176"],
-        ["BlazBlue: Continuum Shift Extend","504768003469082655"],
-        ["Blobby Volley 2","504768329651585035"],
-        ["Boundless","504768467724140544"],
-        ["Cabal 2","504769131615223838"],
-        ["Cataclysm: Dark Days Ahead","504785474901114920"],
-        ["CHAOS CODE -NEW SIGN OF CATASTROPHE-","504788636525395998"],
-        ["Chronicle: RuneScape Legends","504790398984781834"],
-        ["Combat Mission Black Sea","504801397825470464"],
-        ["Combat Mission Shock Force","504801527219617808"],
-        ["Command & Conquer™ Red Alert 2 and Yuri’s Revenge","504801959954612274"],
-        ["Command: Modern Air / Naval Operations WOTY","504802253413154846"],
-        ["Cosmic Dust & Rust","504802641763762176"],
-        ["CosmicBreak","504802978784346122"],
-        ["CosmicBreak2","504803174880903188"],
-        ["CosmicLeague_US","504803374613528600"],
-        ["Creeper World 2","504803589898633216"],
-        ["Carrier Command: Gaea Mission","504824168861270033"],
-        ["Demul version 0.5.6.3","505116958086266920"],
-        ["Homeworld: Deserts of Kharak","505117107097174062"],
-        ["Disgaea PC","505123261546496000"],
-        ["Disney Infinity 3.0: Gold Edition","505123562756112405"],
-        ["Disney Infinity 2.0: Gold Edition","505123882232053810"],
-        ["ドラゴンクエストＸ　いにしえの竜の伝承　オンライン","505125120960888877"],
-        ["E.Y.E: Divine Cybermancy","505129908562034716"],
-        ["nQuake","505131009583480844"],
-        ["Fable - The Lost Chapters","505133560391401472"],
-        ["TouHou Makuka Sai ~ Fantastic Danmaku Festival","505133803258249253"],
-        ["FCEUX 2.2.3","505134014034870283"],
-        ["FINAL FANTASY XI","505134378138075144"],
-        ["Gahkthun of the Golden Lightning Steam Edition","505134723543203851"],
-        ["Garfield Kart","505134938354352128"],
-        ["SkyDrift","505135507907543070"],
-        ["Grandia II Anniversary Edition","505135738719961143"],
-        ["GRID Autosport","505135989694398512"],
-        ["The Fruit of Grisaia","505136406109356032"],
-        ["Grisaia Phantom Trigger Vol.2","505136671138906132"],
-        ["Microsoft Halo Trial","505137576256995328"],
-        ["Heavy Weapon Deluxe","505137992642592815"],
-        ["Hyperdimension Neptunia Re;Birth2 Sisters Generation","505138235937259549"],
-        ["Hyperdimension Neptunia Re;Birth3 V Generation","505138532700913671"],
-        ["Illarion","505138979264528414"],
-        ["OpenITG","505139561995829278"],
-        ["Invisible, Inc.","505139793940709376"],
-        ["IvAc","505139956017266688"],
-        ["Just Cause","505140295931920404"],
-        ["神採りアルケミーマイスター","505140655501213696"],
-        ["Kara no Shojo 2","505140834644000812"],
-        ["Knights of Pen and Paper 2","505141441388085298"],
-        ["MTGArena","505142532297064468"],
-        ["マジカルバトルアリーナNEXT・幻想郷空閃姫","505142782654939150"],
-        ["Native Instruments Maschine 2","505143168287899676"],
-        ["MELTY BLOOD Actress Again Current Code","505143546244890691"],
-        ["Metal Gear Solid 2 Substance","505146559835406352"],
-        ["Modlands 0.512a version 0.512a","505147819255136297"],
-        ["NEO AQUARIUM - The King of Crustaceans -","505150034698960952"],
-        ["Offspring Fling!","505150420377665566"],
-        ["OlliOlli2: Welcome to Olliwood","505150905696649216"],
-        ["Organ Trail: Director's Cut","505151146722197504"],
-        ["PangYa (NtreevSoft)","505151476427915283"],
-        ["Perpetuum","505151662151958530"],
-        ["Phantasy Star Online Blue Burst","505152925115482112"],
-        ["Phantom Breaker: Battle Grounds","505153286840516649"],
-        ["Project Hedra","505153723941781523"],
-        ["Icons: Combat Arena","505187200011337738"],
-        ["LET IT DIE","505256510453186560"],
-        ["DiRT 2","505486620468838447"],
-        ["Mabinogi","505489300545208340"],
-        ["Metal Gear Solid","505489991175110676"],
-        ["MapleRoyals","505490321174560783"],
-        ["Houdini Indie","505490535629324318"],
-        ["Infantry","505490756782391338"],
-        ["Helbreath Apocalypse","505490939008122940"],
-        ["Flash Flash Revolution","505491268755914772"],
-        ["Dwarf Fortress","505491707253620739"],
-        ["Quake III","505493023031951411"],
-        ["King of Fighters XIII","505493399688839170"],
-        ["Nitronic Rush","505494175702188032"],
-        ["PCSX2","505494914872770583"],
-        ["Phase Shift","505495076974231588"],
-        ["Planescape: Torment","505495215856025620"],
-        ["Q.U.B.E: Director's Cut","505496236548292648"],
-        ["Rebound Arena","505496835721396254"],
-        ["REGEN","505496955095482387"],
-        ["RetroArch","505497615748694018"],
-        ["Return To Castle Wolfenstein","505497930292133908"],
-        ["Rise of Agon","505498499043819520"],
-        ["Rosenkreuzstilette","505498725297422351"],
-        ["S4 League","505498926443528202"],
-        ["SC2VN - The eSports Visual Novel","505499045079416833"],
-        ["Shadow Complex Remastered","505500036214292545"],
-        ["Sonic & All Stars Racing Transformed","505500365404373004"],
-        ["ePSXe","505500770683322399"],
-        ["SoulWorker","505501322947199006"],
-        ["SpyParty","505502210117861387"],
-        ["Super Smash Flash EXE Version 1.0","505502693113200640"],
-        ["Super Smash Flash 2 Beta","505502904640208902"],
-        ["The Floor is Lava","505503697799872532"],
-        ["The Last Remnant","505503999403884544"],
-        ["The Simpsons Hit & Run(TM)","505504523012276234"],
-        ["Thrillville: Off the Rails","505504809437364244"],
-        ["Titanfall™","505505165705609246"],
-        ["TMNT 2 - Battle Nexus","505505520417767425"],
-        ["Tomb Raider (VI): The Angel of Darkness","505505686705405962"],
-        ["Tomoyo After ~It's a Wonderful Life~ English Edition","505505972899414046"],
-        ["Touhou 10: Mountain of Faith","505506583304732695"],
-        ["Touhou 10.5: Scarlet Weather Rhapsody","505506928596877352"],
-        ["Touhou 11: Subterranean Animism","505507257224658987"],
-        ["Touhou 12: Undefined Fantastic Object","505512749149716480"],
-        ["Touhou 12.3: Hisoutensoku","505513116302573578"],
-        ["Touhou 12.5: Double Spoiler","505513477645926430"],
-        ["Touhou 12.8: Great Fairy Wars","505513776607395868"],
-        ["Touhou 13: Ten Desires","505514028341395495"],
-        ["Touhou 13.5 Hopeless Mascarade","505514368520290305"],
-        ["Touhou 14: Double Dealing Character","505514719885393960"],
-        ["Touhou 14.3: Impossible Spell Card","505515309726433328"],
-        ["Touhou 14.5: Urban Legend in Limbo","505515610667614232"],
-        ["Touhou 15: Legacy of Lunatic Kingdom","505515966289936393"],
-        ["Touhou 15.5: Antinomy of Common Flowers","505516276115046415"],
-        ["Touhou 7: Perfect Cherry Blossom","505516832590004244"],
-        ["Touhou 7.5: Immaterial and Missing Power","505517064601993254"],
-        ["Touhou 8: Imperishable Night","505517586327535646"],
-        ["Touhou 9: Phantasmagoria Of Flower View","505517882873085952"],
-        ["Touhou 9.5: Shoot the Bullet","505518102545432605"],
-        ["Touhou Puppet Dance Performance","505518371333472276"],
-        ["Touhou Sky Arena","505518699395022867"],
-        ["The Legend of Heroes: Trails in the Sky","505519194146603009"],
-        ["The Legend of Heroes: Trails in the Sky SC","505519505091592222"],
-        ["VA-11 HALL-A","505520072870199335"],
-        ["VisualBoyAdvance","505520145997889546"],
-        ["Warzone 2100","505520727521361941"],
-        ["Xonotic","505520839303757848"],
-        ["YGOPro","505520955649556490"],
-        ["ZSNESw","505521162042736657"],
-        ["Zwift","505523904517898240"],
-        ["Allods Online","505531160990973952"],
-        ["Murderous Pursuits","505801835613913098"],
-        ["Sword Art Online: Hollow Realization Deluxe Edition","506057315485483008"],
-        ["METAL GEAR SURVIVE","506873722745913355"],
-        ["Aim Lab","506950362461110273"],
-        ["Galactic Civilizations III","507674068498120714"],
-        ["Parkasaurus","508008071411400724"],
-        ["Visage","508057374875975682"],
-        ["Kynseed","510199020782747732"],
-        ["Thronebreaker","511619499053678668"],
-        ["Paladins Strike","512498684211232768"],
-        ["Fallout 76","512501896896970762"],
-        ["Battlefield™ V","512699108809637890"],
-        ["Battle Chef Brigade","512789120234422301"],
-        ["Kingsway","512789343157485602"],
-        ["Zenzizenzic","512789427462995988"],
-        ["Borderlands 3","514228311661084682"],
-        ["Realm Royale","518088627234930688"],
-        ["Turok","519644267212177418"],
-        ["Turok 2: Seeds of Evil","519644368735567873"],
-        ["Ashen","520453007578628124"],
-        ["Hades","520462578061803588"],
-        ["Nitro","521842831262875670"],
-        ["Far Cry New Dawn","523154344187789312"],
-        ["ATLAS","526489929631531009"],
-        ["Paladins","528145079819436043"],
-        ["Metro Exodus","530454325214969866"],
-        ["Sea of Thieves","535371564850479134"],
-        ["LEGO Harry Potter: Years 5-7","535384357536399404"],
-        ["Subnautica: Below Zero","535869836748783616"],
-        ["Ghost Recon Breakpoint","540120593576493057"],
-        ["Apex Legends","542075586886107149"],
-        ["Farming Simulator 19","542474758835535872"],
-        ["Warhammer: Vermintide 2","542475118396309528"],
-        ["Anthem™","546175179542364160"],
-        ["Spellbreak","549512435585908756"],
-        ["Heroes & Generals WWII","550277544025522176"],
-        ["Dawn of Man","553697181249437716"],
-        ["Warface","554573307161214977"],
-        ["Tom Clancy's The Division 2","554921822626381879"],
-        ["Temtem","558547388583772201"],
-        ["Mutant Year Zero: Road to Eden","560781100197216267"],
-        ["Bloodstained: Ritual of the Night","565341641427124244"],
-        ["Sekiro™: Shadows Die Twice","569008830701240340"],
-        ["Risk of Rain 2","569253958967885828"],
-        ["Satisfactory","572456126872944651"],
-        ["MORDHAU","575412499399180288"],
-        ["Baba Is You","576482762446602270"],
-        ["Staxel","584069374462394368"],
-        ["Supreme Ruler Ultimate","588739017718366208"],
-        ["Dota Underlords","592976500802846750"],
-        ["PUBG LITE","597588168178663434"],
-        ["Swords of Gurrah","597860020935327787"],
-        ["Lethal League Blaze","606163888052109312"],
-        ["Bloons TD 6","614380482620293151"],
-        ["Bloons Adventure Time TD","614448244260339712"],
-        ["World of Warcraft Classic","615752773690064908"],
-        ["Tower Keepers","618575278339260467"],
-        ["Gears 5","620685135066693642"],
-        ["Control","620758922940383242"],
-        ["Call of Duty®: Modern Warfare®","631914894446297148"],
-        ["Legends of Runeterra","633832498614370323"],
-        ["The Outer Worlds","637382434089861160"],
-        ["Red Dead Redemption 2","643897785271189524"],
-        ["STAR WARS Jedi: Fallen Order™","649511727641133066"],
-        ["Pirates of the Burning Sea","651923442286985217"],
-        ["Halo: The Master Chief Collection","653432003798106122"],
-        ["Forza Horizon 4","656353816370741248"],
-        ["DOOM Eternal","693016355007496202"],
-        ["Return of the Obra Dinn","696065774061879446"],
-        ["VALORANT","700136079562375258"],
-        ["Age of Empires: Definitive Edition","700150526729519165"],
-        ["Age of Empires II: Definitive Edition","700150779050459157"],
-        ["Wurm Online","714975833495830608"],
-        ["Age of Empires: Definitive Edition","720771267149561936"],
-        ["Age of Empires II: Definitive Edition","720771660768084008"],
-        ["The Surge 2","733854133471150151"],
-        ["DEATH STRANDING","734286565114904586"],
-        ["Rogue Company","737391147659558963"],
-        ["Grounded","738856512868450314"],
-        ["Fall Guys","742897755160313986"],
-        ["Microsoft Flight Simulator","750925046729670796"],
-        ["Genshin Impact","762434991303950386"],
-        ["Assassin's Creed Valhalla","775754545778786314"],
-        ["IL-2 Sturmovik: Battle of Stalingrad","777681581917601792"],
-        ["Call of Duty®: Black Ops Cold War","783440677958189096"],
-        ["Cyberpunk 2077","787443973538971748"],
-        ["STAR WARS™ Battlefront™ (classic)","788507043358834698"],
-        ["Star Wars: Battlefront 2 (Classic, 2005)","788511984575316028"]
-    ];
+    const normalizeUiLocale = locale => String(locale || "en").toLowerCase().replace(/_/g, "-");
+    const DEFAULT_UI_LOCALE = "en";
+    let UI_LOCALE = normalizeUiLocale(
+        navigator.languages?.[0] || navigator.language || DEFAULT_UI_LOCALE
+    );
+
+    const UI_TEXT = {
+        en: {
+            desktopRequiredTitle: "Discord Desktop Required",
+            desktopRequiredBody: "This script must be run in the Discord Desktop client through its DevTools. The browser version does not provide the required modules.",
+            close: "Close",
+            showGamePresence: "Show Game Presence",
+            chooseMode: "Choose a mode",
+            chooseModeSubtitle: "Choose how the script should send game activity to Discord.",
+            chooseModeBadge: "Choose mode",
+            backToMainMenu: "Back to main menu",
+            chooseGame: "Choose a game",
+            settings: "Settings",
+            minimize: "Minimize",
+            stop: "Stop",
+            instantClaim: "Instant Claim",
+            instantDescription: "Credit playtime in batches without displaying a live activity.",
+            liveRichPresence: "Live Rich Presence",
+            liveDescription: "Rotate games and display a live Rich Presence like a normal session.",
+            previousGame: "Previous game",
+            pause: "Pause",
+            nextGame: "Next game",
+            searchGames: "Search {count} games…",
+            rotation: "Rotation",
+            min: "Min",
+            max: "Max",
+            break: "Break",
+            sec: "sec",
+            minUnit: "min",
+            hoursPerGame: "Hours / game",
+            games: "Games",
+            all: "All",
+            perRequest: "Per request",
+            totalHours: "Total hours",
+            requests: "Requests",
+            estimatedTime: "Est. time",
+            batchClaimProgress: "Batch claim progress",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Claim playtime for multiple games at once.",
+            instantBadge: "Instant",
+            readyToClaim: "Ready to claim",
+            configureBatch: "Configure the batch below",
+            liveBadge: "Live Presence",
+            starting: "Starting…",
+            preparingRotation: "Preparing rotation",
+            noGames: "No games found.",
+            typeGameName: "Type a game name.",
+            playing: "Playing · {current}/{total}",
+            resting: "Resting",
+            nextGameIn: "Next game in {time}",
+            paused: "Paused",
+            rotationPaused: "Rotation paused",
+            resumeRotation: "Resume rotation",
+            pauseRotation: "Pause rotation",
+            stopping: "Stopping…",
+            claiming: "Claiming… click to stop",
+            stopped: "Stopped · {count} games",
+            done: "Done · {count} games",
+            failed: "Failed{status} · see console",
+            seconds: "{count}s",
+            minutes: "{count} min"
+        },
+        fr: {
+            desktopRequiredTitle: "Discord Desktop requis",
+            desktopRequiredBody: "Ce script doit être exécuté dans le client Discord Desktop via ses DevTools. La version navigateur ne fournit pas les modules nécessaires.",
+            close: "Fermer",
+            showGamePresence: "Afficher Game Presence",
+            chooseMode: "Choisir un mode",
+            chooseModeSubtitle: "Choisissez comment le script doit envoyer l’activité de jeu à Discord.",
+            chooseModeBadge: "Choisir un mode",
+            backToMainMenu: "Retour au menu principal",
+            chooseGame: "Choisir un jeu",
+            settings: "Paramètres",
+            minimize: "Réduire",
+            stop: "Arrêter",
+            instantClaim: "Claim instantané",
+            instantDescription: "Crédite le temps de jeu par lots sans afficher d’activité en direct.",
+            liveRichPresence: "Rich Presence en direct",
+            liveDescription: "Fait tourner les jeux et affiche une Rich Presence comme une session normale.",
+            previousGame: "Jeu précédent",
+            pause: "Pause",
+            nextGame: "Jeu suivant",
+            searchGames: "Rechercher {count} jeux…",
+            rotation: "Rotation",
+            min: "Min",
+            max: "Max",
+            break: "Pause",
+            sec: "s",
+            minUnit: "min",
+            hoursPerGame: "Heures / jeu",
+            games: "Jeux",
+            all: "Tous",
+            perRequest: "Par requête",
+            totalHours: "Heures totales",
+            requests: "Requêtes",
+            estimatedTime: "Temps estimé",
+            batchClaimProgress: "Progression du batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Crédite le temps de jeu de plusieurs jeux à la fois.",
+            instantBadge: "Instantané",
+            readyToClaim: "Prêt à claim",
+            configureBatch: "Configurez le batch ci-dessous",
+            liveBadge: "Présence en direct",
+            starting: "Démarrage…",
+            preparingRotation: "Préparation de la rotation",
+            noGames: "Aucun jeu trouvé.",
+            typeGameName: "Saisissez un nom de jeu.",
+            playing: "Jeu · {current}/{total}",
+            resting: "Pause",
+            nextGameIn: "Prochain jeu dans {time}",
+            paused: "En pause",
+            rotationPaused: "Rotation en pause",
+            resumeRotation: "Reprendre la rotation",
+            pauseRotation: "Mettre en pause",
+            stopping: "Arrêt…",
+            claiming: "Claim en cours… cliquez pour arrêter",
+            stopped: "Arrêté · {count} jeux",
+            done: "Terminé · {count} jeux",
+            failed: "Échec{status} · voir la console",
+            seconds: "{count}s",
+            minutes: "{count} min"
+        }
+    };
+
+    const withEnglish = overrides => ({ ...UI_TEXT.en, ...overrides });
+    Object.assign(UI_TEXT, {
+        es: withEnglish({
+            desktopRequiredTitle: "Se requiere Discord Desktop",
+            desktopRequiredBody: "Este script debe ejecutarse en el cliente Discord Desktop mediante sus DevTools. La versión del navegador no proporciona los módulos necesarios.",
+            close: "Cerrar",
+            showGamePresence: "Mostrar Game Presence",
+            chooseMode: "Elige un modo",
+            chooseModeSubtitle: "Elige cómo debe enviar el script la actividad del juego a Discord.",
+            chooseModeBadge: "Elegir modo",
+            backToMainMenu: "Volver al menú principal",
+            chooseGame: "Elegir un juego",
+            settings: "Ajustes",
+            minimize: "Minimizar",
+            stop: "Detener",
+            instantClaim: "Claim instantáneo",
+            instantDescription: "Acredita el tiempo de juego por lotes sin mostrar una actividad en directo.",
+            liveRichPresence: "Rich Presence en directo",
+            liveDescription: "Rota los juegos y muestra una Rich Presence en directo como una sesión normal.",
+            previousGame: "Juego anterior",
+            pause: "Pausa",
+            nextGame: "Siguiente juego",
+            searchGames: "Buscar {count} juegos…",
+            rotation: "Rotación",
+            min: "Mín.",
+            max: "Máx.",
+            break: "Pausa",
+            sec: "s",
+            minUnit: "min",
+            hoursPerGame: "Horas / juego",
+            games: "Juegos",
+            all: "Todos",
+            perRequest: "Por solicitud",
+            totalHours: "Horas totales",
+            requests: "Solicitudes",
+            estimatedTime: "Tiempo est.",
+            batchClaimProgress: "Progreso del batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Acredita el tiempo de juego de varios juegos a la vez.",
+            instantBadge: "Instantáneo",
+            readyToClaim: "Listo para reclamar",
+            configureBatch: "Configura el batch abajo",
+            liveBadge: "Presencia en directo",
+            starting: "Iniciando…",
+            preparingRotation: "Preparando la rotación",
+            noGames: "No se encontraron juegos.",
+            typeGameName: "Escribe el nombre de un juego.",
+            playing: "Jugando · {current}/{total}",
+            resting: "En pausa",
+            nextGameIn: "Siguiente juego en {time}",
+            paused: "Pausado",
+            rotationPaused: "Rotación pausada",
+            resumeRotation: "Reanudar rotación",
+            pauseRotation: "Pausar rotación",
+            stopping: "Deteniendo…",
+            claiming: "Reclamando… haz clic para detener",
+            stopped: "Detenido · {count} juegos",
+            done: "Listo · {count} juegos",
+            failed: "Error{status} · revisa la consola",
+            seconds: "{count}s",
+            minutes: "{count} min"
+        }),
+        pt: withEnglish({
+            desktopRequiredTitle: "Discord Desktop necessário",
+            desktopRequiredBody: "Este script tem de ser executado no cliente Discord Desktop através das DevTools. A versão do navegador não fornece os módulos necessários.",
+            close: "Fechar",
+            showGamePresence: "Mostrar Game Presence",
+            chooseMode: "Escolher um modo",
+            chooseModeSubtitle: "Escolha como o script deve enviar a atividade do jogo para o Discord.",
+            chooseModeBadge: "Escolher modo",
+            backToMainMenu: "Voltar ao menu principal",
+            chooseGame: "Escolher um jogo",
+            settings: "Definições",
+            minimize: "Minimizar",
+            stop: "Parar",
+            instantClaim: "Claim instantâneo",
+            instantDescription: "Credita tempo de jogo em lotes sem apresentar uma atividade ao vivo.",
+            liveRichPresence: "Rich Presence ao vivo",
+            liveDescription: "Roda jogos e apresenta uma Rich Presence ao vivo como uma sessão normal.",
+            previousGame: "Jogo anterior",
+            pause: "Pausa",
+            nextGame: "Jogo seguinte",
+            searchGames: "Pesquisar {count} jogos…",
+            rotation: "Rotação",
+            min: "Mín.",
+            max: "Máx.",
+            break: "Intervalo",
+            sec: "seg",
+            minUnit: "min",
+            hoursPerGame: "Horas / jogo",
+            games: "Jogos",
+            all: "Todos",
+            perRequest: "Por pedido",
+            totalHours: "Horas totais",
+            requests: "Pedidos",
+            estimatedTime: "Tempo estimado",
+            batchClaimProgress: "Progresso do batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Credita o tempo de jogo de vários jogos ao mesmo tempo.",
+            instantBadge: "Instantâneo",
+            readyToClaim: "Pronto para claim",
+            configureBatch: "Configure o batch abaixo",
+            liveBadge: "Presença ao vivo",
+            starting: "A iniciar…",
+            preparingRotation: "A preparar a rotação",
+            noGames: "Não foram encontrados jogos.",
+            typeGameName: "Escreva o nome de um jogo.",
+            playing: "A jogar · {current}/{total}",
+            resting: "Em pausa",
+            nextGameIn: "Próximo jogo em {time}",
+            paused: "Pausado",
+            rotationPaused: "Rotação pausada",
+            resumeRotation: "Retomar rotação",
+            pauseRotation: "Pausar rotação",
+            stopping: "A parar…",
+            claiming: "A fazer claim… clique para parar",
+            stopped: "Parado · {count} jogos",
+            done: "Concluído · {count} jogos",
+            failed: "Falhou{status} · consulte a consola",
+            seconds: "{count}s",
+            minutes: "{count} min"
+        }),
+        "pt-br": withEnglish({
+            desktopRequiredTitle: "Discord Desktop necessário",
+            desktopRequiredBody: "Este script precisa ser executado no cliente Discord Desktop pelas DevTools. A versão do navegador não fornece os módulos necessários.",
+            close: "Fechar",
+            showGamePresence: "Mostrar Game Presence",
+            chooseMode: "Escolha um modo",
+            chooseModeSubtitle: "Escolha como o script deve enviar a atividade do jogo para o Discord.",
+            chooseModeBadge: "Escolher modo",
+            backToMainMenu: "Voltar ao menu principal",
+            chooseGame: "Escolher um jogo",
+            settings: "Configurações",
+            minimize: "Minimizar",
+            stop: "Parar",
+            instantClaim: "Claim instantâneo",
+            instantDescription: "Credita tempo de jogo em lotes sem exibir uma atividade ao vivo.",
+            liveRichPresence: "Rich Presence ao vivo",
+            liveDescription: "Alterna os jogos e exibe uma Rich Presence ao vivo como uma sessão normal.",
+            previousGame: "Jogo anterior",
+            pause: "Pausar",
+            nextGame: "Próximo jogo",
+            searchGames: "Pesquisar {count} jogos…",
+            rotation: "Rotação",
+            min: "Mín.",
+            max: "Máx.",
+            break: "Intervalo",
+            sec: "s",
+            minUnit: "min",
+            hoursPerGame: "Horas / jogo",
+            games: "Jogos",
+            all: "Todos",
+            perRequest: "Por requisição",
+            totalHours: "Horas totais",
+            requests: "Requisições",
+            estimatedTime: "Tempo est.",
+            batchClaimProgress: "Progresso do batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Credita o tempo de jogo de vários jogos de uma vez.",
+            instantBadge: "Instantâneo",
+            readyToClaim: "Pronto para claim",
+            configureBatch: "Configure o batch abaixo",
+            liveBadge: "Presença ao vivo",
+            starting: "Iniciando…",
+            preparingRotation: "Preparando a rotação",
+            noGames: "Nenhum jogo encontrado.",
+            typeGameName: "Digite o nome de um jogo.",
+            playing: "Jogando · {current}/{total}",
+            resting: "Em pausa",
+            nextGameIn: "Próximo jogo em {time}",
+            paused: "Pausado",
+            rotationPaused: "Rotação pausada",
+            resumeRotation: "Retomar rotação",
+            pauseRotation: "Pausar rotação",
+            stopping: "Parando…",
+            claiming: "Fazendo claim… clique para parar",
+            stopped: "Parado · {count} jogos",
+            done: "Concluído · {count} jogos",
+            failed: "Falhou{status} · veja o console",
+            seconds: "{count}s",
+            minutes: "{count} min"
+        }),
+        de: withEnglish({
+            desktopRequiredTitle: "Discord Desktop erforderlich",
+            desktopRequiredBody: "Dieses Skript muss über die DevTools im Discord-Desktop-Client ausgeführt werden. Die Browserversion stellt die benötigten Module nicht bereit.",
+            close: "Schließen",
+            showGamePresence: "Game Presence anzeigen",
+            chooseMode: "Modus auswählen",
+            chooseModeSubtitle: "Wähle, wie das Skript die Spielaktivität an Discord senden soll.",
+            chooseModeBadge: "Modus auswählen",
+            backToMainMenu: "Zurück zum Hauptmenü",
+            chooseGame: "Spiel auswählen",
+            settings: "Einstellungen",
+            minimize: "Minimieren",
+            stop: "Stopp",
+            instantClaim: "Sofortiger Claim",
+            instantDescription: "Spielzeit stapelweise gutschreiben, ohne eine Live-Aktivität anzuzeigen.",
+            liveRichPresence: "Live Rich Presence",
+            liveDescription: "Spiele rotieren und eine Live Rich Presence wie in einer normalen Sitzung anzeigen.",
+            previousGame: "Vorheriges Spiel",
+            pause: "Pause",
+            nextGame: "Nächstes Spiel",
+            searchGames: "{count} Spiele suchen…",
+            rotation: "Rotation",
+            min: "Min.",
+            max: "Max.",
+            break: "Pause",
+            sec: "Sek.",
+            minUnit: "Min.",
+            hoursPerGame: "Stunden / Spiel",
+            games: "Spiele",
+            all: "Alle",
+            perRequest: "Pro Anfrage",
+            totalHours: "Gesamtstunden",
+            requests: "Anfragen",
+            estimatedTime: "Geschätzte Zeit",
+            batchClaimProgress: "Batch-Claim-Fortschritt",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Spielzeit für mehrere Spiele gleichzeitig gutschreiben.",
+            instantBadge: "Sofort",
+            readyToClaim: "Bereit zum Claim",
+            configureBatch: "Batch unten konfigurieren",
+            liveBadge: "Live-Präsenz",
+            starting: "Wird gestartet…",
+            preparingRotation: "Rotation wird vorbereitet",
+            noGames: "Keine Spiele gefunden.",
+            typeGameName: "Gib einen Spielnamen ein.",
+            playing: "Spielt · {current}/{total}",
+            resting: "Wartezeit",
+            nextGameIn: "Nächstes Spiel in {time}",
+            paused: "Pausiert",
+            rotationPaused: "Rotation pausiert",
+            resumeRotation: "Rotation fortsetzen",
+            pauseRotation: "Rotation pausieren",
+            stopping: "Wird gestoppt…",
+            claiming: "Claim läuft… zum Stoppen klicken",
+            stopped: "Gestoppt · {count} Spiele",
+            done: "Fertig · {count} Spiele",
+            failed: "Fehler{status} · Konsole prüfen",
+            seconds: "{count} Sek.",
+            minutes: "{count} Min."
+        }),
+        it: withEnglish({
+            desktopRequiredTitle: "Discord Desktop richiesto",
+            desktopRequiredBody: "Questo script deve essere eseguito nel client Discord Desktop tramite i DevTools. La versione del browser non fornisce i moduli necessari.",
+            close: "Chiudi",
+            showGamePresence: "Mostra Game Presence",
+            chooseMode: "Scegli una modalità",
+            chooseModeSubtitle: "Scegli come lo script deve inviare l'attività di gioco a Discord.",
+            chooseModeBadge: "Scegli modalità",
+            backToMainMenu: "Torna al menu principale",
+            chooseGame: "Scegli un gioco",
+            settings: "Impostazioni",
+            minimize: "Riduci",
+            stop: "Ferma",
+            instantClaim: "Claim istantaneo",
+            instantDescription: "Accredita il tempo di gioco in blocchi senza mostrare un'attività live.",
+            liveRichPresence: "Rich Presence live",
+            liveDescription: "Ruota i giochi e mostra una Rich Presence live come una sessione normale.",
+            previousGame: "Gioco precedente",
+            pause: "Pausa",
+            nextGame: "Gioco successivo",
+            searchGames: "Cerca {count} giochi…",
+            rotation: "Rotazione",
+            min: "Min.",
+            max: "Max.",
+            break: "Pausa",
+            sec: "sec",
+            minUnit: "min",
+            hoursPerGame: "Ore / gioco",
+            games: "Giochi",
+            all: "Tutti",
+            perRequest: "Per richiesta",
+            totalHours: "Ore totali",
+            requests: "Richieste",
+            estimatedTime: "Tempo stimato",
+            batchClaimProgress: "Avanzamento del batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Accredita il tempo di gioco di più giochi contemporaneamente.",
+            instantBadge: "Istantaneo",
+            readyToClaim: "Pronto per il claim",
+            configureBatch: "Configura il batch qui sotto",
+            liveBadge: "Presenza live",
+            starting: "Avvio…",
+            preparingRotation: "Preparazione della rotazione",
+            noGames: "Nessun gioco trovato.",
+            typeGameName: "Inserisci il nome di un gioco.",
+            playing: "In gioco · {current}/{total}",
+            resting: "In pausa",
+            nextGameIn: "Prossimo gioco tra {time}",
+            paused: "In pausa",
+            rotationPaused: "Rotazione in pausa",
+            resumeRotation: "Riprendi rotazione",
+            pauseRotation: "Metti in pausa la rotazione",
+            stopping: "Arresto…",
+            claiming: "Claim in corso… fai clic per fermare",
+            stopped: "Fermato · {count} giochi",
+            done: "Fatto · {count} giochi",
+            failed: "Errore{status} · controlla la console",
+            seconds: "{count}s",
+            minutes: "{count} min"
+        }),
+        nl: withEnglish({
+            desktopRequiredTitle: "Discord Desktop vereist",
+            desktopRequiredBody: "Dit script moet via de DevTools in de Discord Desktop-client worden uitgevoerd. De browserversie levert de benodigde modules niet.",
+            close: "Sluiten",
+            showGamePresence: "Game Presence tonen",
+            chooseMode: "Kies een modus",
+            chooseModeSubtitle: "Kies hoe het script game-activiteit naar Discord moet sturen.",
+            chooseModeBadge: "Modus kiezen",
+            backToMainMenu: "Terug naar hoofdmenu",
+            chooseGame: "Kies een game",
+            settings: "Instellingen",
+            minimize: "Minimaliseren",
+            stop: "Stoppen",
+            instantClaim: "Instant Claim",
+            instantDescription: "Speeltijd in batches toevoegen zonder een live activiteit te tonen.",
+            liveRichPresence: "Live Rich Presence",
+            liveDescription: "Games roteren en een live Rich Presence tonen zoals een normale sessie.",
+            previousGame: "Vorige game",
+            pause: "Pauze",
+            nextGame: "Volgende game",
+            searchGames: "{count} games zoeken…",
+            rotation: "Rotatie",
+            min: "Min.",
+            max: "Max.",
+            break: "Pauze",
+            sec: "sec",
+            minUnit: "min",
+            hoursPerGame: "Uren / game",
+            games: "Games",
+            all: "Alle",
+            perRequest: "Per verzoek",
+            totalHours: "Totale uren",
+            requests: "Verzoeken",
+            estimatedTime: "Geschatte tijd",
+            batchClaimProgress: "Voortgang van batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Speeltijd voor meerdere games tegelijk toevoegen.",
+            instantBadge: "Instant",
+            readyToClaim: "Klaar om te claimen",
+            configureBatch: "Configureer de batch hieronder",
+            liveBadge: "Live aanwezigheid",
+            starting: "Starten…",
+            preparingRotation: "Rotatie voorbereiden",
+            noGames: "Geen games gevonden.",
+            typeGameName: "Typ een gamenaam.",
+            playing: "Aan het spelen · {current}/{total}",
+            resting: "Wachten",
+            nextGameIn: "Volgende game over {time}",
+            paused: "Gepauzeerd",
+            rotationPaused: "Rotatie gepauzeerd",
+            resumeRotation: "Rotatie hervatten",
+            pauseRotation: "Rotatie pauzeren",
+            stopping: "Stoppen…",
+            claiming: "Claimen… klik om te stoppen",
+            stopped: "Gestopt · {count} games",
+            done: "Klaar · {count} games",
+            failed: "Mislukt{status} · controleer de console",
+            seconds: "{count}s",
+            minutes: "{count} min"
+        }),
+        ru: withEnglish({
+            desktopRequiredTitle: "Требуется Discord Desktop",
+            desktopRequiredBody: "Скрипт нужно запускать в клиенте Discord Desktop через DevTools. Версия в браузере не предоставляет необходимые модули.",
+            close: "Закрыть",
+            showGamePresence: "Показать Game Presence",
+            chooseMode: "Выберите режим",
+            chooseModeSubtitle: "Выберите, как скрипт будет отправлять игровую активность в Discord.",
+            chooseModeBadge: "Выбрать режим",
+            backToMainMenu: "Вернуться в главное меню",
+            chooseGame: "Выбрать игру",
+            settings: "Настройки",
+            minimize: "Свернуть",
+            stop: "Остановить",
+            instantClaim: "Мгновенный Claim",
+            instantDescription: "Начислять игровое время пакетами без отображения активности в реальном времени.",
+            liveRichPresence: "Live Rich Presence",
+            liveDescription: "Переключать игры и показывать Live Rich Presence как в обычной сессии.",
+            previousGame: "Предыдущая игра",
+            pause: "Пауза",
+            nextGame: "Следующая игра",
+            searchGames: "Поиск игр ({count})…",
+            rotation: "Ротация",
+            min: "Мин.",
+            max: "Макс.",
+            break: "Перерыв",
+            sec: "сек",
+            minUnit: "мин",
+            hoursPerGame: "Часов / игра",
+            games: "Игры",
+            all: "Все",
+            perRequest: "За запрос",
+            totalHours: "Всего часов",
+            requests: "Запросы",
+            estimatedTime: "Примерное время",
+            batchClaimProgress: "Прогресс batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Начислять игровое время для нескольких игр одновременно.",
+            instantBadge: "Мгновенно",
+            readyToClaim: "Готово к claim",
+            configureBatch: "Настройте batch ниже",
+            liveBadge: "Live Presence",
+            starting: "Запуск…",
+            preparingRotation: "Подготовка ротации",
+            noGames: "Игры не найдены.",
+            typeGameName: "Введите название игры.",
+            playing: "Играет · {current}/{total}",
+            resting: "Перерыв",
+            nextGameIn: "Следующая игра через {time}",
+            paused: "Приостановлено",
+            rotationPaused: "Ротация приостановлена",
+            resumeRotation: "Продолжить ротацию",
+            pauseRotation: "Приостановить ротацию",
+            stopping: "Остановка…",
+            claiming: "Выполняется claim… нажмите для остановки",
+            stopped: "Остановлено · игр: {count}",
+            done: "Готово · игр: {count}",
+            failed: "Ошибка{status} · см. консоль",
+            seconds: "{count} сек",
+            minutes: "{count} мин"
+        }),
+        ja: withEnglish({
+            desktopRequiredTitle: "Discord デスクトップ版が必要です",
+            desktopRequiredBody: "このスクリプトは Discord デスクトップ版の DevTools から実行してください。ブラウザ版には必要なモジュールがありません。",
+            close: "閉じる",
+            showGamePresence: "Game Presence を表示",
+            chooseMode: "モードを選択",
+            chooseModeSubtitle: "ゲームアクティビティを Discord に送信する方法を選択してください。",
+            chooseModeBadge: "モードを選択",
+            backToMainMenu: "メインメニューに戻る",
+            chooseGame: "ゲームを選択",
+            settings: "設定",
+            minimize: "最小化",
+            stop: "停止",
+            instantClaim: "インスタント Claim",
+            instantDescription: "ライブアクティビティを表示せず、ゲーム時間をまとめて加算します。",
+            liveRichPresence: "ライブ Rich Presence",
+            liveDescription: "通常のセッションのようにゲームを切り替え、ライブ Rich Presence を表示します。",
+            previousGame: "前のゲーム",
+            pause: "一時停止",
+            nextGame: "次のゲーム",
+            searchGames: "{count} 個のゲームを検索…",
+            rotation: "ローテーション",
+            min: "最小",
+            max: "最大",
+            break: "休憩",
+            sec: "秒",
+            minUnit: "分",
+            hoursPerGame: "ゲームごとの時間",
+            games: "ゲーム",
+            all: "すべて",
+            perRequest: "リクエストごと",
+            totalHours: "合計時間",
+            requests: "リクエスト",
+            estimatedTime: "推定時間",
+            batchClaimProgress: "Batch Claim の進行状況",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "複数のゲームのプレイ時間を一度に加算します。",
+            instantBadge: "インスタント",
+            readyToClaim: "Claim の準備完了",
+            configureBatch: "下で Batch を設定してください",
+            liveBadge: "ライブ状態",
+            starting: "開始中…",
+            preparingRotation: "ローテーションを準備中",
+            noGames: "ゲームが見つかりません。",
+            typeGameName: "ゲーム名を入力してください。",
+            playing: "プレイ中 · {current}/{total}",
+            resting: "休憩中",
+            nextGameIn: "次のゲームまで {time}",
+            paused: "一時停止中",
+            rotationPaused: "ローテーションは一時停止中です",
+            resumeRotation: "ローテーションを再開",
+            pauseRotation: "ローテーションを一時停止",
+            stopping: "停止中…",
+            claiming: "Claim 中…停止するにはクリック",
+            stopped: "停止しました · {count} ゲーム",
+            done: "完了 · {count} ゲーム",
+            failed: "失敗{status} · コンソールを確認してください",
+            seconds: "{count}秒",
+            minutes: "{count}分"
+        }),
+        ko: withEnglish({
+            desktopRequiredTitle: "Discord 데스크톱이 필요합니다",
+            desktopRequiredBody: "이 스크립트는 Discord 데스크톱 클라이언트의 DevTools에서 실행해야 합니다. 브라우저 버전에는 필요한 모듈이 없습니다.",
+            close: "닫기",
+            showGamePresence: "Game Presence 표시",
+            chooseMode: "모드 선택",
+            chooseModeSubtitle: "게임 활동을 Discord에 전송할 방식을 선택하세요.",
+            chooseModeBadge: "모드 선택",
+            backToMainMenu: "메인 메뉴로 돌아가기",
+            chooseGame: "게임 선택",
+            settings: "설정",
+            minimize: "최소화",
+            stop: "중지",
+            instantClaim: "즉시 Claim",
+            instantDescription: "라이브 활동을 표시하지 않고 게임 시간을 묶음으로 추가합니다.",
+            liveRichPresence: "라이브 Rich Presence",
+            liveDescription: "일반 세션처럼 게임을 순환하며 라이브 Rich Presence를 표시합니다.",
+            previousGame: "이전 게임",
+            pause: "일시정지",
+            nextGame: "다음 게임",
+            searchGames: "{count}개 게임 검색…",
+            rotation: "순환",
+            min: "최소",
+            max: "최대",
+            break: "휴식",
+            sec: "초",
+            minUnit: "분",
+            hoursPerGame: "게임당 시간",
+            games: "게임",
+            all: "전체",
+            perRequest: "요청당",
+            totalHours: "총 시간",
+            requests: "요청",
+            estimatedTime: "예상 시간",
+            batchClaimProgress: "Batch Claim 진행률",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "여러 게임의 플레이 시간을 한 번에 추가합니다.",
+            instantBadge: "즉시",
+            readyToClaim: "Claim 준비 완료",
+            configureBatch: "아래에서 Batch를 설정하세요",
+            liveBadge: "라이브 상태",
+            starting: "시작 중…",
+            preparingRotation: "순환 준비 중",
+            noGames: "게임을 찾을 수 없습니다.",
+            typeGameName: "게임 이름을 입력하세요.",
+            playing: "플레이 중 · {current}/{total}",
+            resting: "휴식 중",
+            nextGameIn: "다음 게임까지 {time}",
+            paused: "일시정지됨",
+            rotationPaused: "순환이 일시정지되었습니다",
+            resumeRotation: "순환 재개",
+            pauseRotation: "순환 일시정지",
+            stopping: "중지 중…",
+            claiming: "Claim 중… 중지하려면 클릭",
+            stopped: "중지됨 · {count}개 게임",
+            done: "완료 · {count}개 게임",
+            failed: "실패{status} · 콘솔을 확인하세요",
+            seconds: "{count}초",
+            minutes: "{count}분"
+        }),
+        "zh-cn": withEnglish({
+            desktopRequiredTitle: "需要 Discord 桌面版",
+            desktopRequiredBody: "此脚本必须通过 DevTools 在 Discord 桌面客户端中运行。浏览器版本不提供所需模块。",
+            close: "关闭",
+            showGamePresence: "显示 Game Presence",
+            chooseMode: "选择模式",
+            chooseModeSubtitle: "选择脚本向 Discord 发送游戏活动的方式。",
+            chooseModeBadge: "选择模式",
+            backToMainMenu: "返回主菜单",
+            chooseGame: "选择游戏",
+            settings: "设置",
+            minimize: "最小化",
+            stop: "停止",
+            instantClaim: "即时 Claim",
+            instantDescription: "批量增加游戏时间，不显示实时活动。",
+            liveRichPresence: "实时 Rich Presence",
+            liveDescription: "像正常游戏一样轮换游戏并显示实时 Rich Presence。",
+            previousGame: "上一个游戏",
+            pause: "暂停",
+            nextGame: "下一个游戏",
+            searchGames: "搜索 {count} 个游戏…",
+            rotation: "轮换",
+            min: "最小",
+            max: "最大",
+            break: "间隔",
+            sec: "秒",
+            minUnit: "分钟",
+            hoursPerGame: "每个游戏的小时数",
+            games: "游戏",
+            all: "全部",
+            perRequest: "每次请求",
+            totalHours: "总小时数",
+            requests: "请求数",
+            estimatedTime: "预计时间",
+            batchClaimProgress: "Batch Claim 进度",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "一次为多个游戏增加游戏时间。",
+            instantBadge: "即时",
+            readyToClaim: "准备 Claim",
+            configureBatch: "在下方配置 Batch",
+            liveBadge: "实时状态",
+            starting: "启动中…",
+            preparingRotation: "正在准备轮换",
+            noGames: "未找到游戏。",
+            typeGameName: "请输入游戏名称。",
+            playing: "正在游玩 · {current}/{total}",
+            resting: "休息中",
+            nextGameIn: "下一个游戏将在 {time} 后开始",
+            paused: "已暂停",
+            rotationPaused: "轮换已暂停",
+            resumeRotation: "恢复轮换",
+            pauseRotation: "暂停轮换",
+            stopping: "正在停止…",
+            claiming: "正在 Claim… 点击停止",
+            stopped: "已停止 · {count} 个游戏",
+            done: "完成 · {count} 个游戏",
+            failed: "失败{status} · 请查看控制台",
+            seconds: "{count}秒",
+            minutes: "{count}分钟"
+        }),
+        "zh-tw": withEnglish({
+            desktopRequiredTitle: "需要 Discord 桌面版",
+            desktopRequiredBody: "此腳本必須透過 DevTools 在 Discord 桌面用戶端中執行。瀏覽器版本不提供所需模組。",
+            close: "關閉",
+            showGamePresence: "顯示 Game Presence",
+            chooseMode: "選擇模式",
+            chooseModeSubtitle: "選擇腳本將遊戲活動傳送到 Discord 的方式。",
+            chooseModeBadge: "選擇模式",
+            backToMainMenu: "返回主選單",
+            chooseGame: "選擇遊戲",
+            settings: "設定",
+            minimize: "最小化",
+            stop: "停止",
+            instantClaim: "即時 Claim",
+            instantDescription: "批次增加遊戲時間，不顯示即時活動。",
+            liveRichPresence: "即時 Rich Presence",
+            liveDescription: "像正常遊戲一樣輪換遊戲並顯示即時 Rich Presence。",
+            previousGame: "上一個遊戲",
+            pause: "暫停",
+            nextGame: "下一個遊戲",
+            searchGames: "搜尋 {count} 個遊戲…",
+            rotation: "輪換",
+            min: "最小",
+            max: "最大",
+            break: "間隔",
+            sec: "秒",
+            minUnit: "分鐘",
+            hoursPerGame: "每個遊戲的小時數",
+            games: "遊戲",
+            all: "全部",
+            perRequest: "每次請求",
+            totalHours: "總小時數",
+            requests: "請求數",
+            estimatedTime: "預估時間",
+            batchClaimProgress: "Batch Claim 進度",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "一次為多個遊戲增加遊戲時間。",
+            instantBadge: "即時",
+            readyToClaim: "準備 Claim",
+            configureBatch: "在下方設定 Batch",
+            liveBadge: "即時狀態",
+            starting: "啟動中…",
+            preparingRotation: "正在準備輪換",
+            noGames: "找不到遊戲。",
+            typeGameName: "請輸入遊戲名稱。",
+            playing: "遊玩中 · {current}/{total}",
+            resting: "休息中",
+            nextGameIn: "下一個遊戲將在 {time} 後開始",
+            paused: "已暫停",
+            rotationPaused: "輪換已暫停",
+            resumeRotation: "恢復輪換",
+            pauseRotation: "暫停輪換",
+            stopping: "正在停止…",
+            claiming: "正在 Claim… 點擊停止",
+            stopped: "已停止 · {count} 個遊戲",
+            done: "完成 · {count} 個遊戲",
+            failed: "失敗{status} · 請查看主控台",
+            seconds: "{count}秒",
+            minutes: "{count}分鐘"
+        }),
+        tr: withEnglish({
+            desktopRequiredTitle: "Discord Desktop gerekli",
+            desktopRequiredBody: "Bu script, DevTools üzerinden Discord Desktop istemcisinde çalıştırılmalıdır. Tarayıcı sürümü gerekli modülleri sağlamaz.",
+            close: "Kapat",
+            showGamePresence: "Game Presence göster",
+            chooseMode: "Bir mod seç",
+            chooseModeSubtitle: "Scriptin oyun etkinliğini Discord'a nasıl göndereceğini seç.",
+            chooseModeBadge: "Mod seç",
+            backToMainMenu: "Ana menüye dön",
+            chooseGame: "Oyun seç",
+            settings: "Ayarlar",
+            minimize: "Küçült",
+            stop: "Durdur",
+            instantClaim: "Anında Claim",
+            instantDescription: "Canlı etkinlik göstermeden oyun süresini toplu olarak ekle.",
+            liveRichPresence: "Canlı Rich Presence",
+            liveDescription: "Oyunları döndür ve normal bir oturum gibi canlı Rich Presence göster.",
+            previousGame: "Önceki oyun",
+            pause: "Duraklat",
+            nextGame: "Sonraki oyun",
+            searchGames: "{count} oyun ara…",
+            rotation: "Döngü",
+            min: "Min.",
+            max: "Maks.",
+            break: "Mola",
+            sec: "sn",
+            minUnit: "dk",
+            hoursPerGame: "Oyun başına saat",
+            games: "Oyunlar",
+            all: "Tümü",
+            perRequest: "İstek başına",
+            totalHours: "Toplam saat",
+            requests: "İstekler",
+            estimatedTime: "Tahmini süre",
+            batchClaimProgress: "Batch claim ilerlemesi",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Birden fazla oyunun oynama süresini aynı anda ekle.",
+            instantBadge: "Anında",
+            readyToClaim: "Claim için hazır",
+            configureBatch: "Batch'i aşağıdan yapılandır",
+            liveBadge: "Canlı durum",
+            starting: "Başlatılıyor…",
+            preparingRotation: "Döngü hazırlanıyor",
+            noGames: "Oyun bulunamadı.",
+            typeGameName: "Bir oyun adı yaz.",
+            playing: "Oynanıyor · {current}/{total}",
+            resting: "Bekleniyor",
+            nextGameIn: "Sonraki oyun {time} sonra",
+            paused: "Duraklatıldı",
+            rotationPaused: "Döngü duraklatıldı",
+            resumeRotation: "Döngüyü sürdür",
+            pauseRotation: "Döngüyü duraklat",
+            stopping: "Durduruluyor…",
+            claiming: "Claim yapılıyor… durdurmak için tıkla",
+            stopped: "Durduruldu · {count} oyun",
+            done: "Tamamlandı · {count} oyun",
+            failed: "Başarısız{status} · konsolu kontrol et",
+            seconds: "{count} sn",
+            minutes: "{count} dk"
+        }),
+        hi: withEnglish({
+            desktopRequiredTitle: "Discord Desktop आवश्यक है",
+            desktopRequiredBody: "यह स्क्रिप्ट Discord Desktop क्लाइंट में DevTools के माध्यम से चलानी होगी। ब्राउज़र संस्करण आवश्यक मॉड्यूल उपलब्ध नहीं कराता।",
+            close: "बंद करें",
+            showGamePresence: "Game Presence दिखाएँ",
+            chooseMode: "मोड चुनें",
+            chooseModeSubtitle: "चुनें कि स्क्रिप्ट Discord को गेम गतिविधि कैसे भेजे।",
+            chooseModeBadge: "मोड चुनें",
+            backToMainMenu: "मुख्य मेनू पर लौटें",
+            chooseGame: "गेम चुनें",
+            settings: "सेटिंग्स",
+            minimize: "छोटा करें",
+            stop: "रोकें",
+            instantClaim: "तुरंत Claim",
+            instantDescription: "लाइव गतिविधि दिखाए बिना गेम समय को बैच में जोड़ें।",
+            liveRichPresence: "Live Rich Presence",
+            liveDescription: "गेम बदलें और सामान्य सत्र की तरह Live Rich Presence दिखाएँ।",
+            previousGame: "पिछला गेम",
+            pause: "रोकें",
+            nextGame: "अगला गेम",
+            searchGames: "{count} गेम खोजें…",
+            rotation: "रोटेशन",
+            min: "न्यूनतम",
+            max: "अधिकतम",
+            break: "विराम",
+            sec: "सेकंड",
+            minUnit: "मिनट",
+            hoursPerGame: "प्रति गेम घंटे",
+            games: "गेम",
+            all: "सभी",
+            perRequest: "प्रति अनुरोध",
+            totalHours: "कुल घंटे",
+            requests: "अनुरोध",
+            estimatedTime: "अनुमानित समय",
+            batchClaimProgress: "Batch Claim प्रगति",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "एक साथ कई गेम का समय जोड़ें।",
+            instantBadge: "तुरंत",
+            readyToClaim: "Claim के लिए तैयार",
+            configureBatch: "नीचे Batch कॉन्फ़िगर करें",
+            liveBadge: "Live Presence",
+            starting: "शुरू हो रहा है…",
+            preparingRotation: "रोटेशन तैयार हो रहा है",
+            noGames: "कोई गेम नहीं मिला।",
+            typeGameName: "गेम का नाम लिखें।",
+            playing: "खेला जा रहा है · {current}/{total}",
+            resting: "विराम",
+            nextGameIn: "{time} में अगला गेम",
+            paused: "रोका गया",
+            rotationPaused: "रोटेशन रोक दिया गया है",
+            resumeRotation: "रोटेशन फिर शुरू करें",
+            pauseRotation: "रोटेशन रोकें",
+            stopping: "रोका जा रहा है…",
+            claiming: "Claim हो रहा है… रोकने के लिए क्लिक करें",
+            stopped: "रोक दिया गया · {count} गेम",
+            done: "पूरा हुआ · {count} गेम",
+            failed: "विफल{status} · कंसोल देखें",
+            seconds: "{count} सेकंड",
+            minutes: "{count} मिनट"
+        }),
+        pl: withEnglish({
+            desktopRequiredTitle: "Wymagany Discord Desktop",
+            desktopRequiredBody: "Ten skrypt musi być uruchomiony w kliencie Discord Desktop przez DevTools. Wersja przeglądarkowa nie udostępnia wymaganych modułów.",
+            close: "Zamknij",
+            showGamePresence: "Pokaż Game Presence",
+            chooseMode: "Wybierz tryb",
+            chooseModeSubtitle: "Wybierz, jak skrypt ma wysyłać aktywność gry do Discorda.",
+            chooseModeBadge: "Wybierz tryb",
+            backToMainMenu: "Wróć do menu głównego",
+            chooseGame: "Wybierz grę",
+            settings: "Ustawienia",
+            minimize: "Minimalizuj",
+            stop: "Zatrzymaj",
+            instantClaim: "Natychmiastowy Claim",
+            instantDescription: "Dodawaj czas gry partiami bez wyświetlania aktywności na żywo.",
+            liveRichPresence: "Live Rich Presence",
+            liveDescription: "Zmieniaj gry i pokazuj Live Rich Presence jak podczas normalnej sesji.",
+            previousGame: "Poprzednia gra",
+            pause: "Pauza",
+            nextGame: "Następna gra",
+            searchGames: "Szukaj wśród {count} gier…",
+            rotation: "Rotacja",
+            min: "Min.",
+            max: "Maks.",
+            break: "Przerwa",
+            sec: "sek.",
+            minUnit: "min",
+            hoursPerGame: "Godziny / gra",
+            games: "Gry",
+            all: "Wszystkie",
+            perRequest: "Na żądanie",
+            totalHours: "Łączna liczba godzin",
+            requests: "Żądania",
+            estimatedTime: "Szacowany czas",
+            batchClaimProgress: "Postęp batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Dodawaj czas gry dla wielu gier jednocześnie.",
+            instantBadge: "Natychmiast",
+            readyToClaim: "Gotowe do claim",
+            configureBatch: "Skonfiguruj batch poniżej",
+            liveBadge: "Live Presence",
+            starting: "Uruchamianie…",
+            preparingRotation: "Przygotowywanie rotacji",
+            noGames: "Nie znaleziono gier.",
+            typeGameName: "Wpisz nazwę gry.",
+            playing: "Gra · {current}/{total}",
+            resting: "Przerwa",
+            nextGameIn: "Następna gra za {time}",
+            paused: "Wstrzymano",
+            rotationPaused: "Rotacja jest wstrzymana",
+            resumeRotation: "Wznów rotację",
+            pauseRotation: "Wstrzymaj rotację",
+            stopping: "Zatrzymywanie…",
+            claiming: "Trwa claim… kliknij, aby zatrzymać",
+            stopped: "Zatrzymano · {count} gier",
+            done: "Gotowe · {count} gier",
+            failed: "Błąd{status} · sprawdź konsolę",
+            seconds: "{count} sek.",
+            minutes: "{count} min"
+        }),
+        uk: withEnglish({
+            desktopRequiredTitle: "Потрібен Discord Desktop",
+            desktopRequiredBody: "Цей скрипт потрібно запускати в клієнті Discord Desktop через DevTools. Версія в браузері не надає необхідних модулів.",
+            close: "Закрити",
+            showGamePresence: "Показати Game Presence",
+            chooseMode: "Виберіть режим",
+            chooseModeSubtitle: "Виберіть, як скрипт надсилатиме ігрову активність у Discord.",
+            chooseModeBadge: "Вибрати режим",
+            backToMainMenu: "Повернутися до головного меню",
+            chooseGame: "Вибрати гру",
+            settings: "Налаштування",
+            minimize: "Згорнути",
+            stop: "Зупинити",
+            instantClaim: "Миттєвий Claim",
+            instantDescription: "Нараховувати ігровий час пакетами без показу активності наживо.",
+            liveRichPresence: "Live Rich Presence",
+            liveDescription: "Перемикати ігри та показувати Live Rich Presence як у звичайній сесії.",
+            previousGame: "Попередня гра",
+            pause: "Пауза",
+            nextGame: "Наступна гра",
+            searchGames: "Пошук серед {count} ігор…",
+            rotation: "Ротація",
+            min: "Мін.",
+            max: "Макс.",
+            break: "Перерва",
+            sec: "с",
+            minUnit: "хв",
+            hoursPerGame: "Годин / гра",
+            games: "Ігри",
+            all: "Усі",
+            perRequest: "За запит",
+            totalHours: "Усього годин",
+            requests: "Запити",
+            estimatedTime: "Орієнтовний час",
+            batchClaimProgress: "Прогрес batch claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "Нараховувати час для кількох ігор одночасно.",
+            instantBadge: "Миттєво",
+            readyToClaim: "Готово до claim",
+            configureBatch: "Налаштуйте batch нижче",
+            liveBadge: "Live Presence",
+            starting: "Запуск…",
+            preparingRotation: "Підготовка ротації",
+            noGames: "Ігри не знайдено.",
+            typeGameName: "Введіть назву гри.",
+            playing: "Грає · {current}/{total}",
+            resting: "Перерва",
+            nextGameIn: "Наступна гра через {time}",
+            paused: "Призупинено",
+            rotationPaused: "Ротацію призупинено",
+            resumeRotation: "Продовжити ротацію",
+            pauseRotation: "Призупинити ротацію",
+            stopping: "Зупинка…",
+            claiming: "Виконується claim… натисніть для зупинки",
+            stopped: "Зупинено · {count} ігор",
+            done: "Готово · {count} ігор",
+            failed: "Помилка{status} · див. консоль",
+            seconds: "{count} с",
+            minutes: "{count} хв"
+        }),
+        ar: withEnglish({
+            desktopRequiredTitle: "يلزم Discord Desktop",
+            desktopRequiredBody: "يجب تشغيل هذا السكربت في عميل Discord Desktop عبر DevTools. إصدار المتصفح لا يوفر الوحدات المطلوبة.",
+            close: "إغلاق",
+            showGamePresence: "إظهار Game Presence",
+            chooseMode: "اختر الوضع",
+            chooseModeSubtitle: "اختر طريقة إرسال نشاط اللعبة إلى Discord.",
+            chooseModeBadge: "اختر الوضع",
+            backToMainMenu: "العودة إلى القائمة الرئيسية",
+            chooseGame: "اختر لعبة",
+            settings: "الإعدادات",
+            minimize: "تصغير",
+            stop: "إيقاف",
+            instantClaim: "Claim فوري",
+            instantDescription: "إضافة وقت اللعب على دفعات بدون عرض نشاط مباشر.",
+            liveRichPresence: "Rich Presence مباشر",
+            liveDescription: "تدوير الألعاب وعرض Rich Presence مباشر مثل الجلسة العادية.",
+            previousGame: "اللعبة السابقة",
+            pause: "إيقاف مؤقت",
+            nextGame: "اللعبة التالية",
+            searchGames: "ابحث عن {count} لعبة…",
+            rotation: "التدوير",
+            min: "الحد الأدنى",
+            max: "الحد الأقصى",
+            break: "استراحة",
+            sec: "ث",
+            minUnit: "د",
+            hoursPerGame: "الساعات / اللعبة",
+            games: "الألعاب",
+            all: "الكل",
+            perRequest: "لكل طلب",
+            totalHours: "إجمالي الساعات",
+            requests: "الطلبات",
+            estimatedTime: "الوقت المقدّر",
+            batchClaimProgress: "تقدم Batch Claim",
+            claim: "Claim",
+            batchClaim: "Batch Claim",
+            batchSubtitle: "إضافة وقت اللعب لعدة ألعاب في نفس الوقت.",
+            instantBadge: "فوري",
+            readyToClaim: "جاهز لـ Claim",
+            configureBatch: "اضبط Batch أدناه",
+            liveBadge: "حالة مباشرة",
+            starting: "جارٍ البدء…",
+            preparingRotation: "جارٍ تجهيز التدوير",
+            noGames: "لم يتم العثور على ألعاب.",
+            typeGameName: "اكتب اسم لعبة.",
+            playing: "قيد اللعب · {current}/{total}",
+            resting: "استراحة",
+            nextGameIn: "اللعبة التالية خلال {time}",
+            paused: "متوقف مؤقتًا",
+            rotationPaused: "التدوير متوقف مؤقتًا",
+            resumeRotation: "استئناف التدوير",
+            pauseRotation: "إيقاف التدوير مؤقتًا",
+            stopping: "جارٍ الإيقاف…",
+            claiming: "جارٍ تنفيذ Claim… اضغط للإيقاف",
+            stopped: "تم الإيقاف · {count} ألعاب",
+            done: "تم · {count} ألعاب",
+            failed: "فشل{status} · راجع وحدة التحكم",
+            seconds: "{count} ث",
+            minutes: "{count} د"
+        })
+    });
+    UI_TEXT["pt-pt"] = UI_TEXT.pt;
+    UI_TEXT.zh = UI_TEXT["zh-cn"];
+    UI_TEXT["zh-hans"] = UI_TEXT["zh-cn"];
+    UI_TEXT["zh-hant"] = UI_TEXT["zh-tw"];
+    UI_TEXT["zh-hk"] = UI_TEXT["zh-tw"];
+    UI_TEXT["zh-mo"] = UI_TEXT["zh-tw"];
+
+    function t(key, variables = {}) {
+        const localePack = UI_TEXT[UI_LOCALE] ?? UI_TEXT[UI_LOCALE.split("-")[0]] ?? UI_TEXT.en;
+        const template = localePack[key] ?? UI_TEXT.en[key] ?? key;
+        return Object.entries(variables).reduce(
+            (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+            template
+        );
+    }
+
+    function isDiscordDesktopClient() {
+        return typeof window.DiscordNative !== "undefined" &&
+            typeof window.webpackChunkdiscord_app !== "undefined";
+    }
+
+    function showDesktopOnlyPopup() {
+        document.getElementById("gp-desktop-required")?.remove();
+        const overlay = document.createElement("div");
+        overlay.id = "gp-desktop-required";
+        overlay.innerHTML = `
+            <style>
+                #gp-desktop-required { position:fixed; inset:0; z-index:2147483647; display:grid; place-items:center;
+                    padding:24px; background:rgba(0,0,0,.72); color:#fafafa;
+                    font-family:"Geist","Geist Fallback","Inter","Segoe UI",Arial,sans-serif; }
+                #gp-desktop-required .dialog { width:min(420px,100%); padding:28px; text-align:center;
+                    background:#101010; border:2px solid #2b2b2b; border-radius:16px;
+                    box-shadow:0 14px 35px rgba(122,86,212,.18); }
+                #gp-desktop-required h2 { margin:0; font-size:18px; font-weight:600; }
+                #gp-desktop-required p { margin:10px 0 22px; color:#a3a3a3; font-size:13px; line-height:1.5; }
+                #gp-desktop-required button { padding:10px 18px; border:0; border-radius:6px; background:#8355d3;
+                    color:#fff; cursor:pointer; font:inherit; font-size:13px; }
+                #gp-desktop-required button:hover { background:#9b7be5; }
+            </style>
+            <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="gp-desktop-required-title">
+                <h2 id="gp-desktop-required-title">${t("desktopRequiredTitle")}</h2>
+                <p>${t("desktopRequiredBody")}</p>
+                <button type="button" data-close>${t("close")}</button>
+            </div>`;
+        overlay.querySelector("[data-close]").addEventListener("click", () => overlay.remove());
+        (document.body ?? document.documentElement).appendChild(overlay);
+    }
+
+    if (!isDiscordDesktopClient()) {
+        showDesktopOnlyPopup();
+        if (window[LOCK] === loadingLock) delete window[LOCK];
+        return;
+    }
+
+    let GAMES = [];
 
     const DEFAULTS = {
-        minMinutes: 20,
-        maxMinutes: 20,
-        restMinutes: 2,
-        timingVersion: 2,
+        minMinutes: 1,
+        maxMinutes: 5,
+        restMinutes: 0.25,
+        timingVersion: 3,
         paused: false,
         minimized: false,
         corner: "bottom-right",
-        creditPlaytime: false,
         batchHours: 1,
         batchCount: 0,
         batchChunk: 16
     };
+    const MODES = { INSTANT: "instant", LIVE: "live" };
     const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
     const settings = (() => {
         let saved = {};
@@ -1887,11 +1203,10 @@ void (async () => {
         }
         s.minMinutes = clamp(Number(s.minMinutes) || DEFAULTS.minMinutes, 1, 1440);
         s.maxMinutes = clamp(Number(s.maxMinutes) || DEFAULTS.maxMinutes, s.minMinutes, 1440);
-        s.restMinutes = clamp(Number(s.restMinutes) || DEFAULTS.restMinutes, 1, 10);
+        s.restMinutes = clamp(Number(s.restMinutes) || DEFAULTS.restMinutes, 0.25, 10);
         s.timingVersion = DEFAULTS.timingVersion;
         s.paused = Boolean(s.paused);
         s.minimized = Boolean(s.minimized);
-        s.creditPlaytime = Boolean(s.creditPlaytime);
         s.batchHours = clamp(Number(s.batchHours) || DEFAULTS.batchHours, 0.1, 9999);
         s.batchCount = Math.max(0, Math.floor(Number(s.batchCount) || 0));
         s.batchChunk = clamp(Math.floor(Number(s.batchChunk)) || DEFAULTS.batchChunk, 1, 500);
@@ -1908,7 +1223,7 @@ void (async () => {
         return executable?.name?.replace(/^>/, "").replace(/^.*[\\/]/, "") || null;
     }
 
-    async function fetchDetectableCatalogue() {
+    async function fetchGames() {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 10_000);
         try {
@@ -1920,7 +1235,7 @@ void (async () => {
             if (!response.ok) throw new Error(`Discord CDN returned ${response.status}`);
 
             const rawGames = await response.json();
-            if (!Array.isArray(rawGames)) throw new Error("Discord CDN returned an invalid catalogue");
+            if (!Array.isArray(rawGames)) throw new Error("Discord CDN returned an invalid games list");
 
             const seen = new Set();
             const games = [];
@@ -1941,18 +1256,14 @@ void (async () => {
     }
 
     try {
-        const remoteCatalogue = await fetchDetectableCatalogue();
-        const remoteIds = new Set(remoteCatalogue.map(([, id]) => id));
-        const embeddedOnly = CATALOG.filter(([, id]) => !remoteIds.has(id));
-        CATALOG = [...remoteCatalogue, ...embeddedOnly];
-        console.info(`[Game Presence] Loaded ${remoteCatalogue.length} detectable games from Discord (+${embeddedOnly.length} embedded).`);
+        GAMES = await fetchGames();
     } catch (error) {
-        console.warn("[Game Presence] Could not load Discord's catalogue; using embedded fallback.", error);
+        if (window[LOCK] === loadingLock) delete window[LOCK];
+        throw new Error(`[Game Presence] Could not load Discord's games: ${error?.message ?? error}`);
     }
 
     if (cancelledWhileLoading || window[LOCK] !== loadingLock) {
         if (window[LOCK] === loadingLock) delete window[LOCK];
-        console.warn("[Game Presence] Startup cancelled.");
         return;
     }
 
@@ -2022,6 +1333,19 @@ void (async () => {
 
     const req = getWebpackRequire();
     if (!req?.c) throw new Error("[Game Presence] Discord Webpack not found (Discord desktop is required).");
+    const discordLocaleStore = findInModules(req, value =>
+        hasMethod(value, "getLocale") || hasMethod(value, "getCurrentLocale")
+    );
+    for (const method of ["getLocale", "getCurrentLocale"]) {
+        if (!discordLocaleStore || !hasMethod(discordLocaleStore, method)) continue;
+        try {
+            const discordLocale = discordLocaleStore[method]();
+            if (discordLocale) {
+                UI_LOCALE = normalizeUiLocale(discordLocale);
+                break;
+            }
+        } catch (_) {}
+    }
 
     const nativeShim = {
         hadDiscordNative: Boolean(window.DiscordNative),
@@ -2095,9 +1419,9 @@ void (async () => {
     const isLinux = /Linux/i.test(navigator.userAgent);
     const OS = isLinux ? "linux" : "win32";
     const pid = 45000 + Math.floor(Math.random() * 10000);
-    const order = shuffle(CATALOG.map((_, i) => i));
+    const order = shuffle(GAMES.map((_, i) => i));
     let cursor = 0;
-    const NAMES = CATALOG.map(([name]) => normalize(name));
+    const NAMES = GAMES.map(([name]) => normalize(name));
     const SEARCH_ALIASES = new Map([
         [normalize("GTA 6"), normalize("Grand Theft Auto VI")],
         [normalize("GTA  VI"), normalize("Grand Theft Auto VI")],
@@ -2113,8 +1437,10 @@ void (async () => {
     let switchDuration = 0;
     let breakEndsAt = 0;
     let isResting = false;
+    let selectedMode = null;
+    let runtimeInstalled = false;
 
-    const entry = () => CATALOG[order[cursor]];
+    const entry = () => GAMES[order[cursor]];
     const iconCache = new Map();
     const iconUrl = applicationId => {
         if (!iconCache.has(applicationId)) {
@@ -2173,6 +1499,8 @@ void (async () => {
     let analyticsToken = "";
     let analyticsTokenFetchedAt = 0;
     let analyticsSequence = 0;
+    let analyticsUserId = "";
+    let generatedFingerprintPromise = null;
     const fingerprints = new Map();
     const analyticsSession = {
         heartbeatSession: crypto.randomUUID(),
@@ -2205,7 +1533,38 @@ void (async () => {
         };
     }
 
-    function fingerprintFor(gameId) {
+    async function generateFingerprint(userId) {
+        if (!userId) return "";
+
+        const enc = new TextEncoder();
+        const sha256 = async data => new Uint8Array(await crypto.subtle.digest("SHA-256", data));
+        const guid = crypto.randomUUID();
+        const machineUserHash = await sha256(enc.encode(guid + userId));
+        const headerHash = await sha256(enc.encode(`pe_header_${userId}`));
+        const sectionHash = await sha256(enc.encode(`pe_section_${userId}`));
+        const certHash = await sha256(enc.encode(`pe_cert_${userId}`));
+
+        const buffer = new Uint8Array(146);
+        const view = new DataView(buffer.buffer);
+        buffer[0] = 1;
+        buffer[1] = 1;
+        view.setBigUint64(2, 65432100n, true);
+        view.setUint32(10, 1690000000, true);
+        view.setUint32(14, 0x02500000, true);
+        buffer.set(headerHash, 18);
+        buffer.set(machineUserHash, 50);
+        buffer.set(sectionHash, 82);
+        buffer.set(certHash, 114);
+
+        const key = await sha256(enc.encode(`${userId}https://discord.com/careers`));
+        for (let i = 1; i < buffer.length; i++) buffer[i] ^= key[(i - 1) & 31];
+
+        let binary = "";
+        for (const byte of buffer) binary += String.fromCharCode(byte);
+        return btoa(binary);
+    }
+
+    async function fingerprintFor(gameId) {
         const known = fingerprints.get(gameId);
         if (known !== undefined) return known;
 
@@ -2217,10 +1576,14 @@ void (async () => {
             ];
         } catch (_) {}
 
-        const fingerprint = detected.find(game =>
+        let fingerprint = detected.find(game =>
             (game?.id === gameId || game?.application_id === gameId) && game?.executableFingerprint
         )?.executableFingerprint ?? "";
-        fingerprints.set(gameId, fingerprint);
+        if (!fingerprint && analyticsUserId) {
+            generatedFingerprintPromise ??= generateFingerprint(analyticsUserId);
+            fingerprint = await generatedFingerprintPromise;
+        }
+        if (fingerprint || !analyticsUserId) fingerprints.set(gameId, fingerprint);
         return fingerprint;
     }
 
@@ -2271,6 +1634,7 @@ void (async () => {
         }
 
         if (typeof body?.analytics_token !== "string") throw new Error("Discord returned no analytics_token");
+        analyticsUserId = String(body?.id ?? body?.user?.id ?? analyticsUserId);
         analyticsToken = body.analytics_token;
         analyticsTokenFetchedAt = Date.now();
         return analyticsToken;
@@ -2347,7 +1711,7 @@ void (async () => {
     }
 
     async function creditPlaytime(game, durationMs) {
-        if (!settings.creditPlaytime || durationMs < 60_000 || !game?.id) return;
+        if (durationMs < 60_000 || !game?.id) return;
 
         const session = clientSession();
         const token = await getAnalyticsToken();
@@ -2356,26 +1720,14 @@ void (async () => {
         const startedAt = Math.max(0, now - Math.floor(durationMs));
         const events = [
             buildHeartbeat(game, 0, gameSession, true, startedAt),
-            buildLaunch(game, fingerprintFor(game.id), startedAt),
+            buildLaunch(game, await fingerprintFor(game.id), now),
             buildHeartbeat(game, Math.floor(durationMs), gameSession, false, now)
         ];
 
-        if (restAPI?.post) {
-            await restAPI.post({ url: "/science", body: { token, events } });
-        } else {
-            const response = await discordFetch("/science", {
-                method: "POST",
-                credentials: "include",
-                headers: apiHeaders(session.superProperties),
-                body: JSON.stringify({ token, events })
-            });
-            if (!response.ok) throw new Error(`Discord returned ${response.status} while crediting playtime`);
-        }
-        console.info(`[Game Presence] Credited ${Math.round(durationMs / 60_000)}m of ${game.name}`);
+        await postScience(token, events, session);
     }
 
     function creditCurrentSession(game, durationMs) {
-        if (!settings.creditPlaytime) return;
         creditPlaytime(game, durationMs).catch(error =>
             console.warn(`[Game Presence] Could not credit ${game?.name ?? "game"} playtime:`, error)
         );
@@ -2383,27 +1735,115 @@ void (async () => {
 
     const BATCH_DELAY_MS = 1000;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const KODIAK_GUILD_ID = "1289386360716660747";
+    const KODIAK_INVITE_CODE = "kodiakv2";
+    const KODIAK_JOIN_TIMEOUT_MS = 10_000;
+    const KODIAK_JOIN_POLL_MS = 1_000;
+
+    function parseGuildList(body) {
+        const guilds = Array.isArray(body) ? body : body?.guilds;
+        if (!Array.isArray(guilds)) throw new Error("Discord returned an invalid guild list");
+        return guilds;
+    }
+
+    async function currentGuilds() {
+        const session = clientSession();
+        if (restAPI?.get) {
+            const result = await restAPI.get({ url: "/users/@me/guilds" });
+            return parseGuildList(result?.body ?? result);
+        }
+
+        const response = await discordFetch("/users/@me/guilds", {
+            credentials: "include",
+            headers: apiHeaders(session.superProperties)
+        });
+        if (!response.ok) throw new Error(`Discord returned ${response.status} while checking guilds`);
+        return parseGuildList(await response.json());
+    }
+
+    function isKodiakMember(guilds) {
+        return guilds.some(guild => String(guild?.id ?? "") === KODIAK_GUILD_ID);
+    }
+
+    async function acceptKodiakInvite() {
+        const body = { session_id: analyticsSession.launchId };
+        if (restAPI?.post) {
+            const result = await restAPI.post({ url: `/invites/${KODIAK_INVITE_CODE}`, body });
+            const status = Number(result?.status ?? result?.statusCode ?? 200);
+            if (result?.ok === false || status >= 400) {
+                throw new Error(`Discord returned ${status} while accepting the Kodiak invite`);
+            }
+            return;
+        }
+
+        const response = await discordFetch(`/invites/${KODIAK_INVITE_CODE}`, {
+            method: "POST",
+            credentials: "include",
+            headers: apiHeaders(clientSession().superProperties),
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error(`Discord returned ${response.status} while accepting the Kodiak invite`);
+    }
+
+    async function waitForKodiakMembership() {
+        const deadline = Date.now() + KODIAK_JOIN_TIMEOUT_MS;
+        let lastError = null;
+        while (Date.now() < deadline) {
+            if (cancelledWhileLoading || window[LOCK] !== loadingLock) return false;
+            try {
+                if (isKodiakMember(await currentGuilds())) return true;
+            } catch (error) {
+                lastError = error;
+            }
+            await sleep(KODIAK_JOIN_POLL_MS);
+        }
+        throw new Error(lastError
+            ? `Kodiak membership was not confirmed: ${lastError.message}`
+            : "Kodiak membership was not confirmed within 45 seconds");
+    }
+
+    async function ensureKodiakMembership() {
+        if (isKodiakMember(await currentGuilds())) return true;
+        await acceptKodiakInvite();
+        return waitForKodiakMembership();
+    }
+
+    try {
+        const joinedKodiak = await ensureKodiakMembership();
+        if (!joinedKodiak) {
+            if (window[LOCK] === loadingLock) delete window[LOCK];
+            return;
+        }
+    } catch (error) {
+        if (window[LOCK] === loadingLock) delete window[LOCK];
+        throw new Error(`[Game Presence] Could not confirm Kodiak membership: ${error?.message ?? error}`);
+    }
 
     async function postScience(token, events, session) {
         for (let attempt = 0; ; attempt++) {
             let status = 0, retryAfter = 0;
             try {
                 if (restAPI?.post) {
-                    await restAPI.post({ url: "/science", body: { token, events } });
-                    return;
+                    const result = await restAPI.post({ url: "/science", body: { token, events } });
+                    status = Number(result?.status ?? result?.statusCode ?? 0);
+                    const failed = result?.ok === false || (status > 0 && (status < 200 || status >= 300));
+                    if (!failed) return;
+                    retryAfter = Number(result?.retry_after ?? result?.body?.retry_after ?? result?.body?.retryAfter ?? 0);
                 }
-                const response = await discordFetch("/science", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: apiHeaders(session.superProperties),
-                    body: JSON.stringify({ token, events })
-                });
-                if (response.ok) return;
-                status = response.status;
-                retryAfter = Number((await response.json().catch(() => ({}))).retry_after);
+                if (!restAPI?.post) {
+                    const response = await discordFetch("/science", {
+                        method: "POST",
+                        credentials: "include",
+                        headers: apiHeaders(session.superProperties),
+                        body: JSON.stringify({ token, events })
+                    });
+                    if (response.ok) return;
+                    status = response.status;
+                    retryAfter = Number((await response.json().catch(() => ({}))).retry_after);
+                }
             } catch (error) {
                 status = error?.status ?? error?.statusCode ?? 0;
-                retryAfter = Number(error?.body?.retry_after);
+                retryAfter = Number(error?.retry_after ?? error?.body?.retry_after ?? error?.body?.retryAfter ?? 0);
                 if (status !== 429) throw error;
             }
             if (status !== 429 || attempt >= 5) {
@@ -2416,7 +1856,7 @@ void (async () => {
     async function batchClaimAll(hours = 1, count = null, perRequest = 16, onProgress = null, signal = null) {
         const token = await getAnalyticsToken();
         const durationMs = Math.floor(Math.max(0.1, hours) * 3_600_000);
-        const games = (count ? CATALOG.slice(0, count) : CATALOG).map(buildGame);
+        const games = (count ? GAMES.slice(0, count) : GAMES).map(buildGame);
         const chunkSize = clamp(Math.floor(perRequest) || 16, 1, 500);
         const session = clientSession();
         let ok = 0;
@@ -2426,19 +1866,20 @@ void (async () => {
             const now = Date.now();
             const startedAt = Math.max(0, now - durationMs);
             const events = [];
-            for (const game of chunk) {
+            for (let index = 0; index < chunk.length; index += 1) {
+                const game = chunk[index];
                 const gameSession = crypto.randomUUID();
                 events.push(buildHeartbeat(game, 0, gameSession, true, startedAt));
-                events.push(buildLaunch(game, fingerprintFor(game.id), startedAt));
+                events.push(buildLaunch(game, await fingerprintFor(game.id), now));
                 events.push(buildHeartbeat(game, durationMs, gameSession, false, now));
+                onProgress?.(i + index + 1, games.length);
+                await sleep(35);
             }
             await postScience(token, events, session);
             ok += chunk.length;
             onProgress?.(ok, games.length);
-            console.info(`[Game Presence] Batch claim ${ok}/${games.length}`);
             if (i + chunkSize < games.length) await sleep(BATCH_DELAY_MS);
         }
-        console.info(`[Game Presence] Batch claim ${signal?.cancelled ? "stopped" : "done"}: ${ok} games × ${hours}h.`);
         return ok;
     }
 
@@ -2543,13 +1984,13 @@ void (async () => {
     }
 
     function activate() {
+        if (selectedMode !== MODES.LIVE) return;
         clearActivity();
         current = buildGame(entry());
         setDebugGame(current);
         announceActivity();
         if (!activityHeartbeatTimer) activityHeartbeatTimer = setInterval(announceActivity, 30_000);
         ui.showGame(entry(), cursor, order.length);
-        console.log(`[Game Presence] Playing (${cursor + 1}/${order.length}): ${current.name}`);
     }
 
     function schedule() {
@@ -2586,7 +2027,6 @@ void (async () => {
             go(1);
         }, settings.restMinutes * 60_000);
         ui.tick();
-        console.log(`[Game Presence] Resting for ${settings.restMinutes}m before the next game.`);
     }
 
     function clearBreak() {
@@ -2604,15 +2044,18 @@ void (async () => {
     }
 
     function go(step) {
+        if (selectedMode !== MODES.LIVE) return;
         playAt(cursor + step);
     }
 
     function playIndex(catalogIndex) {
+        if (selectedMode !== MODES.LIVE) return;
         const pos = order.indexOf(catalogIndex);
         if (pos >= 0) playAt(pos);
     }
 
     function togglePause() {
+        if (selectedMode !== MODES.LIVE) return;
         settings.paused = !settings.paused;
         save();
         if (settings.paused) {
@@ -2629,43 +2072,56 @@ void (async () => {
     }
 
     function setIntervals(min, max, rest = settings.restMinutes) {
-        settings.minMinutes = clamp(Math.round(min) || 1, 1, 1440);
-        settings.maxMinutes = clamp(Math.round(max) || settings.minMinutes, settings.minMinutes, 1440);
-        settings.restMinutes = clamp(Math.round(rest) || DEFAULTS.restMinutes, 1, 10);
+        settings.minMinutes = clamp(Number(min) || DEFAULTS.minMinutes, 1, 1440);
+        settings.maxMinutes = clamp(Number(max) || settings.minMinutes, settings.minMinutes, 1440);
+        settings.restMinutes = clamp(Number(rest) || DEFAULTS.restMinutes, 0.25, 10);
         save();
         if (current || settings.paused) schedule();
+    }
+
+    function resetRuntime() {
+        clearTimeout(switchTimer);
+        clearTimeout(breakTimer);
+        switchTimer = null;
+        breakTimer = null;
+        tickTimer && clearInterval(tickTimer);
+        tickTimer = null;
+        activityHeartbeatTimer && clearInterval(activityHeartbeatTimer);
+        activityHeartbeatTimer = null;
+        nextSwitchAt = 0;
+        switchDuration = 0;
+        breakEndsAt = 0;
+        isResting = false;
+        if (runtimeInstalled) {
+            try { clearActivity(); } catch (_) {}
+            try { restoreStore(); } catch (_) {}
+            try { restoreNativeShim(); } catch (_) {}
+            runtimeInstalled = false;
+        }
+        selectedMode = null;
     }
 
     function stop() {
         if (stopped) return;
         stopped = true;
-        clearTimeout(switchTimer);
-        clearTimeout(breakTimer);
-        breakTimer = null;
-        breakEndsAt = 0;
-        isResting = false;
-        clearInterval(tickTimer);
-        clearInterval(activityHeartbeatTimer);
-        activityHeartbeatTimer = null;
-        restoreStore();
-        try { clearActivity(); } catch (_) {}
-        restoreNativeShim();
+        resetRuntime();
         window.removeEventListener("pagehide", stop);
         ui.destroy();
         delete window[LOCK];
-        console.log("[Game Presence] Stopped and RunningGameStore restored.");
     }
 
     const ui = (() => {
         const host = document.createElement("div");
         host.id = "gp-host";
-        host.style.cssText = "position:fixed;z-index:999999;";
+        host.dir = UI_LOCALE === "ar" ? "rtl" : "ltr";
+        host.style.cssText = "position:fixed;z-index:999999;will-change:left,top;";
         const shadow = host.attachShadow({ mode: "open" });
 
         const ICON = {
             pad: `<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59l-.9 7.79A2.5 2.5 0 0 0 4.29 19c.9 0 1.73-.48 2.17-1.27L7.5 16h9l1.04 1.73c.44.79 1.27 1.27 2.17 1.27a2.5 2.5 0 0 0 2.49-2.62l-.9-7.79A4 4 0 0 0 17.32 5z"/></svg>`,
             search: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`,
             gear: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+            back: `<svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`,
             min: `<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>`,
             close: `<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
             prev: `<svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>`,
@@ -2678,28 +2134,59 @@ void (async () => {
 
         shadow.innerHTML = `
 <style>
-:host { --accent:#8b5cf6; --accent-2:#6366f1; --accent-soft:rgba(139,92,246,.16);
-        --bg:#111214; --bg-2:#18191c; --bg-3:#232428; --line:rgba(255,255,255,.07);
-        --text:#f2f3f5; --muted:#8e9297; --soft:#c4c7cc; --danger:#ed4245; --ok:#3ba55d; --warn:#faa61a; }
+:host { --accent:#8ea1ff; --accent-2:#6474e6; --accent-soft:rgba(142,161,255,.14);
+        --bg:rgba(12,15,21,.82); --bg-2:rgba(24,29,39,.70); --bg-3:rgba(39,45,58,.64); --line:rgba(218,225,255,.12);
+        --text:#f4f6ff; --muted:#9aa3b5; --soft:#d1d6e3; --danger:#ed6b75; --ok:#55c982; --warn:#f0b35a; }
 * { box-sizing:border-box; font-family:"gg sans","Noto Sans","Helvetica Neue",Arial,sans-serif; }
 button { font:inherit; border:0; cursor:pointer; color:inherit; background:none; padding:0; }
 svg { width:16px; height:16px; display:block; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 
+ .mode-picker { display:block; }
+ .mode-picker[hidden] { display:none; }
+ .mode-card { color:var(--text); }
+ .mode-choice { width:100%; display:flex; align-items:flex-start; gap:12px; padding:12px; text-align:left;
+                border:1px solid var(--line); border-radius:10px; background:var(--bg);
+                backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+                transition:background .15s,border-color .15s,transform .15s; }
+ .mode-choice + .mode-choice { margin-top:10px; }
+ .mode-choice:hover { background:rgba(142,161,255,.12); border-color:rgba(142,161,255,.42); transform:translateY(-1px); }
+ .mode-icon { width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:9px;
+              color:#fff; background:linear-gradient(135deg,rgba(142,161,255,.88),rgba(100,116,230,.88)); }
+ .mode-icon svg { width:15px; height:15px; fill:currentColor; stroke:none; }
+ .mode-copy { min-width:0; }
+ .mode-copy b { display:block; font-size:12.5px; }
+ .mode-copy small { display:block; margin-top:3px; color:var(--muted); font-size:10px; line-height:1.35; }
+
 .panel { width:320px; padding:14px; color:var(--text);
-         background:linear-gradient(180deg,rgba(139,92,246,.10),transparent 140px),var(--bg);
-         border:1px solid var(--line); border-radius:16px; user-select:none;
-         box-shadow:0 20px 50px rgba(0,0,0,.55),inset 0 0 0 1px rgba(139,92,246,.16);
+         background:linear-gradient(145deg,rgba(142,161,255,.10),transparent 48%),rgba(12,15,21,.80);
+         border:1px solid rgba(218,225,255,.15); border-radius:18px; user-select:none;
+         box-shadow:0 24px 55px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05);
+         backdrop-filter:blur(20px) saturate(125%); -webkit-backdrop-filter:blur(20px) saturate(125%);
          transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s; }
-.panel.pulse { transform:translateY(-2px); box-shadow:0 20px 50px rgba(0,0,0,.55),0 0 26px rgba(139,92,246,.32),inset 0 0 0 1px rgba(139,92,246,.35); }
-.panel.dragging { transition:none; opacity:.9; }
+.panel.pulse { transform:translateY(-2px); box-shadow:0 24px 55px rgba(0,0,0,.42),0 0 0 1px rgba(142,161,255,.22) inset; }
+.panel.dragging { transition:none; opacity:1; }
+ .panel.instant .game, .panel.instant .player, .panel.instant .track,
+ .panel.instant .tool[data-act="search"], .panel.instant .tool[data-act="settings"] { display:none; }
+ .panel.instant .batch-card .card-head { display:none; }
+ .panel.instant .rotation-card, .panel.live .batch-card { display:none; }
+ .panel.instant .drawer[data-drawer="settings"] { display:block; margin-top:0; }
+ .panel.mode-selecting .game, .panel.mode-selecting .track, .panel.mode-selecting .player, .panel.mode-selecting .drawer { display:none; }
+ .head-copy { display:block; flex:1; min-width:0; }
+ .head-title { color:var(--text); font-size:12.5px; font-weight:700; }
+ .head-subtitle { margin-top:3px; color:var(--muted); font-size:10.5px; line-height:1.35; }
+ .panel.mode-selecting .head { align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+ .panel.mode-selecting .badge,
+ .panel.mode-selecting .tool[data-act="search"],
+ .panel.mode-selecting .tool[data-act="settings"] { display:none; }
 .mini { display:none; width:48px; height:48px; border-radius:16px; color:#fff;
-        background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 10px 24px rgba(99,102,241,.45); }
+        background:linear-gradient(135deg,rgba(142,161,255,.88),rgba(100,116,230,.88));
+        backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); box-shadow:0 10px 24px rgba(99,102,241,.45); }
 .mini svg { width:22px; height:22px; }
 :host(.minimized) .panel { display:none; }
 :host(.minimized) .mini { display:grid; place-items:center; }
 
-.head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; cursor:grab; }
-.badge { display:flex; align-items:center; gap:7px; padding:5px 10px 5px 9px; border-radius:999px;
+.head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; cursor:grab; }
+.badge { display:none; align-items:center; gap:7px; padding:5px 10px 5px 9px; border-radius:999px;
          background:var(--bg-2); border:1px solid var(--line);
          font-size:10.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--soft); font-variant-numeric:tabular-nums; }
 .dot { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px rgba(59,165,93,.22);
@@ -2712,10 +2199,13 @@ svg { width:16px; height:16px; display:block; fill:none; stroke:currentColor; st
 .tool:hover, .tool.on { background:var(--bg-3); color:var(--text); }
 .tool.on { color:var(--accent); }
 .tool.close:hover { background:rgba(237,66,69,.15); color:var(--danger); }
+ .tool.back { display:none; }
+ .tool.back.visible { display:grid; color:var(--accent); background:var(--accent-soft); }
+ .panel.instant .tool.back { display:none; }
 
-.game { display:flex; align-items:center; gap:12px; padding:10px; margin-bottom:12px; border-radius:12px; background:var(--bg-2); border:1px solid var(--line); }
+.game { display:flex; align-items:center; gap:12px; padding:10px; margin-bottom:12px; border-radius:12px; background:var(--bg-2); border:1px solid var(--line); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
 .icon { width:48px; height:48px; flex-shrink:0; border-radius:12px; overflow:hidden; display:grid; place-items:center; color:#fff;
-        background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 6px 16px rgba(99,102,241,.35); }
+        background:linear-gradient(135deg,rgba(142,161,255,.88),rgba(100,116,230,.88)); box-shadow:0 6px 16px rgba(100,116,230,.25); }
 .icon svg { width:22px; height:22px; }
 .icon img { width:100%; height:100%; object-fit:cover; }
 .info { min-width:0; flex:1; }
@@ -2724,22 +2214,21 @@ svg { width:16px; height:16px; display:block; fill:none; stroke:currentColor; st
 .sub { margin-top:3px; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
 
 .track { height:4px; border-radius:999px; overflow:hidden; background:var(--bg-3); }
-.bar, .pbar { height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
+.bar { height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
 .bar { transition:width 1s linear; }
-.pbar { transition:width .3s ease; }
 
 .player { display:flex; justify-content:center; align-items:center; gap:14px; margin-top:12px; }
 .pbtn { width:32px; height:32px; border-radius:50%; color:var(--soft); display:grid; place-items:center; transition:background .15s,color .15s,transform .15s; }
 .pbtn:hover { color:#fff; background:var(--bg-3); }
 .pbtn svg { width:15px; height:15px; fill:currentColor; stroke:none; }
-.pbtn.play { width:42px; height:42px; color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 8px 20px rgba(99,102,241,.4); }
-.pbtn.play:hover { transform:scale(1.06); background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
+.pbtn.play { width:42px; height:42px; color:#fff; background:linear-gradient(135deg,rgba(142,161,255,.88),rgba(100,116,230,.88)); box-shadow:0 8px 20px rgba(100,116,230,.28); }
+.pbtn.play:hover { transform:scale(1.06); background:linear-gradient(135deg,rgba(142,161,255,.96),rgba(100,116,230,.96)); }
 .pbtn.play svg { width:17px; height:17px; }
 
-.drawer { display:none; margin-top:14px; animation:slide .2s ease-out; }
+.drawer { display:none; margin-top:10px; animation:slide .2s ease-out; }
 .drawer.open { display:block; }
 @keyframes slide { from { opacity:0; transform:translateY(-4px); } }
-.card { padding:12px; border-radius:12px; background:var(--bg-2); border:1px solid var(--line); }
+.card { padding:12px; border-radius:12px; background:var(--bg-2); border:1px solid var(--line); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
 .card + .card { margin-top:10px; }
 .card-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
 .card-head svg { width:14px; height:14px; color:var(--accent); }
@@ -2753,6 +2242,7 @@ svg { width:16px; height:16px; display:block; fill:none; stroke:currentColor; st
 .input i { position:absolute; right:9px; top:50%; transform:translateY(-50%); font-style:normal; font-size:10.5px; font-weight:600; color:var(--muted); pointer-events:none; }
 .input input:has(+ i) { padding-right:28px; }
 input { height:32px; padding:6px 9px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text);
+        backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
         font:inherit; font-size:12.5px; font-weight:600; font-variant-numeric:tabular-nums; outline:none; transition:border-color .15s,box-shadow .15s; }
 input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
 input::placeholder { color:var(--muted); font-weight:500; }
@@ -2775,14 +2265,14 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .btn svg { width:13px; height:13px; fill:currentColor; stroke:none; }
 .apply { background:var(--bg-3); border:1px solid var(--line); color:var(--soft); }
 .apply:hover { color:#fff; }
-.claim { background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 8px 20px rgba(99,102,241,.3); }
+.claim { background:linear-gradient(135deg,rgba(142,161,255,.88),rgba(100,116,230,.88)); box-shadow:0 8px 20px rgba(100,116,230,.24); }
 .claim.running { background:var(--bg-3); box-shadow:none; color:var(--soft); }
 .claim.running:hover { color:var(--danger); filter:none; }
 .claim.done { background:var(--ok); box-shadow:0 8px 20px rgba(59,165,93,.3); }
 .claim.failed { background:var(--danger); box-shadow:0 8px 20px rgba(237,66,69,.3); }
 
 .summary { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:10px; }
-.stat { padding:8px 6px; border-radius:8px; background:var(--bg); border:1px solid var(--line); text-align:center; min-width:0; }
+.stat { padding:8px 6px; border-radius:8px; background:var(--bg); border:1px solid var(--line); text-align:center; min-width:0; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
 .stat b { display:block; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .stat span { display:block; margin-top:2px; font-size:9px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); }
 .progress { display:none; margin-top:10px; }
@@ -2798,77 +2288,319 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
           font-size:12.5px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .result:hover { background:var(--accent-soft); color:#fff; }
 .empty { padding:8px 10px; font-size:11.5px; color:var(--muted); }
+
+/* Rounded control-panel redesign */
+:host { --accent:#8b5cf6; --accent-2:#6d3fd1; --accent-soft:rgba(139,92,246,.16);
+        --bg:rgba(13,10,22,.96); --bg-2:rgba(27,20,43,.92); --bg-3:rgba(45,32,70,.90);
+        --line:rgba(211,192,255,.20); --line-strong:rgba(224,208,255,.36);
+        --text:#edf5ff; --muted:#8fa2b8; --soft:#c7d5e5; --danger:#ed6b75; --ok:#55c982; --warn:#f0b35a; }
+*, *::before, *::after { font-family:"Inter","Segoe UI",Arial,sans-serif; border-radius:6px !important; }
+button { letter-spacing:.01em; }
+
+.panel { width:340px; padding:12px; background:var(--bg) !important; border:1px solid var(--line-strong) !important;
+         border-radius:12px !important; box-shadow:0 18px 42px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.04) !important;
+         backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+.panel.pulse { transform:translateY(-1px); box-shadow:0 18px 42px rgba(0,0,0,.46),inset 0 0 0 1px var(--accent-soft) !important; }
+.head { margin:-12px -12px 12px !important; padding:11px 12px !important; min-height:52px;
+        align-items:flex-start; border-bottom:1px solid var(--line); border-radius:11px 11px 0 0 !important; cursor:grab; }
+.panel.mode-selecting .head { margin-bottom:10px !important; }
+.head-copy { flex:1; min-width:0; }
+.head-title { color:var(--text); font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.head-subtitle { max-width:230px; margin-top:5px; color:var(--muted); font-size:10px; line-height:1.45; }
+.tools { gap:0; margin-left:12px; }
+.tool { width:30px; height:30px; border:1px solid transparent; color:var(--muted); }
+.tool + .tool { border-left-color:var(--line); }
+.tool:hover, .tool.on { background:var(--bg-3) !important; border-color:var(--line-strong); color:var(--text); }
+ .panel.mode-selecting .tool.back { display:none !important; }
+ .panel:not(.mode-selecting) .tool.back { display:grid !important; color:var(--accent); background:var(--accent-soft) !important; border-color:var(--accent); }
+.tool.close:hover { background:rgba(237,107,117,.14) !important; border-color:rgba(237,107,117,.5); color:var(--danger); }
+
+.mode-choice, .game, .card, .stat { border-radius:8px !important; }
+.mode-icon, .icon { border-radius:8px !important; }
+.tool, .pbtn, .btn, input, .result { border-radius:6px !important; }
+.track, .bar, .knob { border-radius:999px !important; }
+.knob::after { border-radius:50% !important; }
+.mini { background:var(--accent) !important; border:1px solid var(--line-strong); box-shadow:none !important; }
+
+.mode-picker { margin:0; }
+ .mode-card.card { padding:0 !important; background:transparent !important; border:0 !important; }
+.mode-choice { padding:12px; background:var(--bg-2) !important; border:1px solid var(--line) !important;
+               transition:background .15s,border-color .15s,transform .15s; }
+.mode-choice:hover { background:var(--bg-3) !important; border-color:var(--accent) !important; transform:none; }
+.mode-icon { width:30px; height:30px; flex-basis:30px; background:var(--accent) !important; color:#10091c;
+             border:1px solid rgba(255,255,255,.22); }
+.mode-copy b { font-size:12px; letter-spacing:.02em; }
+.mode-copy small { margin-top:5px; font-size:10px; line-height:1.45; }
+
+.game, .card, .stat, input, .mode-choice { box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+.game { padding:12px; margin-bottom:10px; background:var(--bg-2) !important; border:1px solid var(--line) !important; }
+.icon { width:44px; height:44px; background:var(--accent) !important; color:#10091c; box-shadow:none !important; }
+.track { height:3px; background:var(--bg-3) !important; }
+.bar { background:var(--accent) !important; }
+.player { gap:0; margin-top:10px; }
+.pbtn { border:1px solid var(--line); color:var(--muted); }
+.pbtn + .pbtn { border-left:0; }
+.pbtn:hover { background:var(--bg-3) !important; color:var(--text); }
+.pbtn.play { width:42px; height:32px; background:var(--accent) !important; color:#10091c; box-shadow:none !important; }
+.pbtn.play:hover { background:#a78bfa !important; transform:none; }
+
+.drawer { margin-top:10px; }
+.card { padding:12px; background:var(--bg-2) !important; border:1px solid var(--line) !important; }
+.card-head { margin:-12px -12px 12px; padding:9px 12px; border-bottom:1px solid var(--line); }
+.card-head h4 { font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
+.grid { gap:6px; }
+input { background:rgba(5,9,15,.70) !important; border:1px solid var(--line) !important; color:var(--text); }
+input:focus { border-color:var(--accent) !important; box-shadow:0 0 0 1px var(--accent) !important; }
+.switch { border-top-color:var(--line); }
+.knob { width:32px; height:18px; background:var(--bg-3); border:1px solid var(--line-strong); }
+.knob::after { top:3px; left:3px; width:10px; height:10px; background:var(--muted); }
+.switch input:checked + .knob { background:var(--accent); border-color:var(--accent); }
+.switch input:checked + .knob::after { transform:translateX(14px); background:#07111b; }
+.btn { height:34px; margin-top:10px; border:1px solid var(--line-strong); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.apply { background:var(--bg-3) !important; border-color:var(--line-strong); color:var(--soft); }
+.apply:hover { background:var(--accent-soft) !important; color:var(--text); }
+.claim { background:var(--accent) !important; color:#10091c; border-color:var(--accent); box-shadow:none !important; }
+.claim:hover { background:#a78bfa !important; filter:none; }
+.claim.running { background:var(--bg-3) !important; color:var(--soft); border-color:var(--line-strong); }
+.claim.done { background:var(--ok) !important; border-color:var(--ok); }
+.claim.failed { background:var(--danger) !important; border-color:var(--danger); }
+.summary { gap:4px; margin-top:8px; }
+.stat { padding:7px 5px; background:rgba(5,9,15,.58) !important; border:1px solid var(--line); }
+.stat b { font-size:12px; }
+.stat span { font-size:8px; letter-spacing:.08em; }
+.progress { margin-top:8px; }
+.search-wrap svg { color:var(--accent); }
+.results { margin-top:6px; }
+.result { padding:8px 10px; border-bottom:1px solid var(--line); font-size:11px; }
+.result:hover { background:var(--accent-soft); color:var(--text); }
+.empty { padding:8px 10px; font-size:10px; }
+
+/* Kodiak component colors: #0a0a0a canvas, translucent cards, #8355d3 primary. */
+:host { --accent:#8355d3; --accent-2:#9b7be5; --accent-soft:rgba(131,85,211,.16);
+        --bg:rgba(16,16,16,.96); --bg-2:rgba(28,28,28,.86); --bg-3:rgba(40,40,40,.92);
+        --line:rgba(48,48,48,.88); --line-strong:rgba(58,58,58,.94);
+        --text:#fafafa; --muted:#a3a3a3; --soft:#d4d4d4; --danger:#ef4444; --ok:#22c55e; --warn:#f59e0b; }
+*, *::before, *::after { box-sizing:border-box; font-family:"Geist","Geist Fallback","Inter","Segoe UI",Arial,sans-serif; border-radius:0 !important; }
+button { letter-spacing:0; }
+
+.panel { width:340px; padding:0 14px 14px; background:rgba(16,16,16,.96) !important; border:2px solid rgba(43,43,43,.96) !important;
+         border-radius:16px !important; box-shadow:0 14px 35px rgba(122,86,212,.16),0 0 24px rgba(131,85,211,.08) !important;
+         backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+.panel.pulse { transform:translateY(-1px); box-shadow:0 14px 35px rgba(122,86,212,.16),0 0 24px rgba(131,85,211,.08),0 0 0 1px var(--accent) !important; }
+.head { margin:0 -14px 14px !important; padding:16px !important; min-height:60px; align-items:flex-start;
+        border-bottom:1px solid rgba(38,38,38,.55); border-radius:14px 14px 0 0 !important; background:transparent !important; cursor:grab; touch-action:none; }
+.panel.mode-selecting .head { margin-bottom:12px !important; }
+.head-copy { flex:1; min-width:0; }
+.head-title { color:var(--text); font-size:14px; font-weight:600; letter-spacing:-.02em; text-transform:none; }
+.head-subtitle { max-width:240px; margin-top:5px; color:var(--muted); font-size:10px; line-height:1.45; }
+.tools { gap:4px; margin-left:12px; }
+.tool { width:28px; height:28px; border:1px solid transparent; border-radius:6px !important; color:var(--muted); transition:background .2s,color .2s,border-color .2s,transform .2s; }
+.tool + .tool { border-left-color:transparent; }
+.tool:hover, .tool.on { background:var(--bg-3) !important; border-color:var(--line-strong); color:var(--accent); transform:translateY(-1px); }
+.panel.mode-selecting .tool.back { display:none !important; }
+.panel:not(.mode-selecting) .tool.back { display:grid !important; color:var(--accent); background:var(--accent-soft) !important; border-color:rgba(131,85,211,.55); }
+.tool.close:hover { background:rgba(239,68,68,.12) !important; border-color:rgba(239,68,68,.55); color:var(--danger); }
+.mini { background:var(--accent) !important; border:1px solid rgba(255,255,255,.18); border-radius:6px !important;
+        box-shadow:0 10px 30px rgba(131,85,211,.32) !important; cursor:grab; touch-action:none; }
+.mini:active { cursor:grabbing; }
+
+.mode-picker { margin:0; }
+.mode-card.card { padding:0 !important; background:transparent !important; border:0 !important; }
+.mode-choice { padding:16px; background:rgba(28,28,28,.86) !important; border:2px solid rgba(48,48,48,.88) !important;
+               border-left:2px solid rgba(48,48,48,.88) !important; border-radius:16px !important; transition:background .2s,border-color .2s,box-shadow .2s,transform .2s; }
+.mode-choice + .mode-choice { margin-top:8px; }
+.mode-choice:hover { background:#25202f !important; border-color:rgba(131,85,211,.62) !important;
+                     box-shadow:0 14px 35px rgba(122,86,212,.10); transform:translateY(-1px) scale(1.01); }
+.mode-icon { width:30px; height:30px; flex-basis:30px; border-radius:6px !important; background:transparent !important;
+             color:var(--accent); border:0; }
+.mode-copy b { font-size:12px; font-weight:600; letter-spacing:0; }
+.mode-copy small { margin-top:5px; color:var(--muted); font-size:10px; line-height:1.45; }
+
+.game, .card, .stat, input, .mode-choice { box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+.game { padding:14px; margin-bottom:10px; background:rgba(27,27,27,.86) !important; border:2px solid rgba(48,48,48,.88) !important;
+        border-radius:16px !important; }
+.icon { width:44px; height:44px; border-radius:8px !important; background:transparent !important;
+        color:var(--accent); border:0; box-shadow:none !important; }
+.track { height:2px; background:#1c1c1c !important; border-radius:999px !important; }
+.bar { background:var(--accent) !important; border-radius:999px !important; box-shadow:0 0 10px rgba(131,85,211,.30); }
+.player { gap:4px; margin-top:10px; }
+.pbtn { width:32px; height:32px; border:1px solid var(--line); border-radius:6px !important; color:var(--muted); }
+.pbtn + .pbtn { border-left:1px solid var(--line); }
+.pbtn:hover { background:var(--bg-3) !important; border-color:var(--line-strong); color:var(--text); }
+.pbtn.play { width:42px; height:32px; border-radius:6px !important; background:var(--accent) !important; color:#fff; box-shadow:0 8px 24px rgba(131,85,211,.24) !important; }
+.pbtn.play:hover { background:var(--accent-2) !important; transform:translateY(-1px); }
+
+.drawer { margin-top:10px; }
+.panel.live .tool[data-act="settings"] { display:none !important; }
+.panel.live { padding-bottom:18px; }
+.panel.live .head { margin-bottom:16px !important; }
+.panel.live .game { margin-bottom:16px; }
+.panel.live .track { margin-top:14px; }
+.panel.live .player { margin-top:14px; margin-bottom:18px; }
+.panel.live .drawer[data-drawer="settings"] { display:block !important; margin-top:16px; }
+.panel.live .rotation-card { padding:18px; }
+.panel.live .rotation-card .grid { margin-top:4px; }
+.card { padding:16px; background:rgba(27,27,27,.86) !important; border:2px solid rgba(48,48,48,.88) !important;
+        border-left:2px solid rgba(48,48,48,.88) !important; border-radius:16px !important; }
+.card-head { margin:-16px -16px 14px; padding:12px 16px; border-bottom:1px solid rgba(48,48,48,.88); }
+.card-head h4 { font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+.grid { gap:6px; }
+input { background:rgba(20,20,20,.94) !important; border:1px solid rgba(48,48,48,.88) !important; border-radius:6px !important; color:var(--text); }
+input:focus { border-color:var(--accent) !important; box-shadow:0 0 0 2px var(--accent-soft) !important; }
+.switch { border-top-color:var(--line); }
+.knob { width:32px; height:18px; border-radius:999px !important; background:var(--bg-3); border:1px solid var(--line-strong); }
+.knob::after { top:3px; left:3px; width:10px; height:10px; border-radius:50% !important; background:var(--muted); }
+.switch input:checked + .knob { background:var(--accent); border-color:var(--accent); }
+.switch input:checked + .knob::after { transform:translateX(14px); background:#fff; }
+.btn { height:36px; margin-top:10px; border:1px solid transparent; border-radius:6px !important; font-size:11px; font-weight:500;
+       letter-spacing:.02em; text-transform:none; transition:background .2s,border-color .2s,box-shadow .2s,transform .2s; }
+.apply { background:transparent !important; border-color:var(--line-strong); color:var(--soft); }
+.apply:hover { background:rgba(131,85,211,.08) !important; border-color:rgba(131,85,211,.65); color:var(--text); transform:translateY(-1px); }
+.claim { background:var(--accent) !important; color:#fff; border-color:transparent; border-radius:6px !important; box-shadow:0 8px 24px rgba(131,85,211,.28) !important; }
+.claim:hover { background:var(--accent-2) !important; filter:none; transform:translateY(-1px); box-shadow:0 12px 30px rgba(131,85,211,.40) !important; }
+.claim.running { background:var(--bg-3) !important; color:var(--soft); border-color:var(--line-strong); box-shadow:none !important; }
+.claim.done { background:var(--ok) !important; border-color:var(--ok); box-shadow:none !important; }
+.claim.failed { background:var(--danger) !important; border-color:var(--danger); box-shadow:none !important; }
+.summary { gap:4px; margin-top:8px; }
+.stat { padding:8px 5px; background:rgba(24,24,24,.82) !important; border:1px solid rgba(48,48,48,.88); border-radius:8px !important; }
+.stat b { font-size:12px; }
+.stat span { font-size:8px; letter-spacing:.08em; }
+.progress { margin-top:8px; }
+.progress-text { margin-top:5px; font-size:9px; }
+.search-wrap svg { color:var(--accent); }
+.results { margin-top:6px; }
+.result { padding:8px 10px; border-bottom:1px solid var(--line); border-radius:0 !important; font-size:11px; }
+.result:hover { background:rgba(131,85,211,.08); color:var(--text); }
+.empty { padding:8px 10px; font-size:10px; color:var(--muted); }
+
+/* The batch claim uses a real, non-interactive range slider as its progress bar. */
+.panel.instant .progress { display:none; margin-top:14px; padding:14px !important; background:rgba(26,26,26,.90) !important;
+                           border:1px solid rgba(131,85,211,.55) !important; border-radius:10px !important; }
+.panel.instant .progress.show { display:block; }
+.panel.instant .progress-slider { --progress:0%; display:block; width:100%; height:18px !important; margin:0 !important; padding:0 !important;
+                                  border:0 !important; border-radius:0 !important; background:transparent !important;
+                                  box-shadow:none !important; opacity:1 !important; appearance:none; -webkit-appearance:none; pointer-events:none; }
+.panel.instant .progress-slider::-webkit-slider-runnable-track { height:8px; border:1px solid #3a3a3a;
+                                                                 border-radius:6px !important;
+                                                                 background:linear-gradient(90deg,#8355d3 0%,#8355d3 var(--progress),#292331 var(--progress),#292331 100%);
+                                                                 box-shadow:inset 0 1px 3px rgba(0,0,0,.55); }
+.panel.instant .progress-slider::-webkit-slider-thumb { width:14px; height:14px; margin-top:-4px; border:2px solid #9b7be5;
+                                                        border-radius:6px !important; background:#8355d3; box-shadow:0 0 8px rgba(131,85,211,.45);
+                                                        appearance:none; -webkit-appearance:none; }
+.panel.instant .progress-slider::-moz-range-track { height:8px; border:1px solid #3a3a3a;
+                                                    border-radius:6px !important; background:#292331; box-shadow:inset 0 1px 3px rgba(0,0,0,.55); }
+.panel.instant .progress-slider::-moz-range-progress { height:8px; border-radius:6px !important; background:#8355d3; }
+.panel.instant .progress-slider::-moz-range-thumb { width:10px; height:10px; border:2px solid #9b7be5;
+                                                   border-radius:6px !important; background:#8355d3; box-shadow:0 0 8px rgba(131,85,211,.45); }
+.panel.instant .progress-text { margin-top:9px; font-size:11px; font-weight:500; color:var(--soft); }
+.credit { margin-top:12px; color:var(--muted); font-size:9px; line-height:1.2; text-align:center; letter-spacing:.04em; }
+.credit span { color:var(--accent-2); font-weight:600; }
 </style>
-<button class="mini" title="Show Game Presence">${ICON.pad}</button>
-<div class="panel">
+<button class="mini" title="${t("showGamePresence")}">${ICON.pad}</button>
+<div class="panel mode-selecting">
   <div class="head">
-    <div class="badge"><span class="dot"></span><span class="count"></span></div>
+    <div class="head-copy">
+      <div class="head-title" id="gp-mode-title">${t("chooseMode")}</div>
+      <div class="head-subtitle">${t("chooseModeSubtitle")}</div>
+    </div>
+    <div class="badge"><span class="dot"></span><span class="count">${t("chooseModeBadge")}</span></div>
     <div class="tools">
-      <button class="tool" data-act="search" title="Choose a game">${ICON.search}</button>
-      <button class="tool" data-act="settings" title="Settings">${ICON.gear}</button>
-      <button class="tool" data-act="minimize" title="Minimize">${ICON.min}</button>
-      <button class="tool close" data-act="stop" title="Stop">${ICON.close}</button>
+      <button class="tool back" data-act="back" title="${t("backToMainMenu")}" aria-label="${t("backToMainMenu")}">${ICON.back}</button>
+      <button class="tool" data-act="search" title="${t("chooseGame")}">${ICON.search}</button>
+      <button class="tool" data-act="settings" title="${t("settings")}">${ICON.gear}</button>
+      <button class="tool" data-act="minimize" title="${t("minimize")}">${ICON.min}</button>
+      <button class="tool close" data-act="stop" title="${t("stop")}">${ICON.close}</button>
+    </div>
+  </div>
+  <div class="mode-picker" role="group" aria-labelledby="gp-mode-title">
+    <div class="card mode-card">
+      <button class="mode-choice" data-mode="instant" type="button">
+        <span class="mode-icon">${ICON.bolt}</span>
+        <span class="mode-copy"><b>${t("instantClaim")}</b><small>${t("instantDescription")}</small></span>
+      </button>
+      <button class="mode-choice" data-mode="live" type="button">
+        <span class="mode-icon">${ICON.pad}</span>
+        <span class="mode-copy"><b>${t("liveRichPresence")}</b><small>${t("liveDescription")}</small></span>
+      </button>
     </div>
   </div>
   <div class="game">
     <div class="icon">${ICON.pad}</div>
-    <div class="info"><div class="label">Now playing</div><div class="title">…</div><div class="sub"></div></div>
+    <div class="info"><div class="title">…</div><div class="sub"></div></div>
   </div>
   <div class="track"><div class="bar"></div></div>
   <div class="player">
-    <button class="pbtn" data-act="prev" title="Previous game">${ICON.prev}</button>
-    <button class="pbtn play" data-act="toggle" title="Pause">${ICON.pause}</button>
-    <button class="pbtn" data-act="next" title="Next game">${ICON.next}</button>
+    <button class="pbtn" data-act="prev" title="${t("previousGame")}">${ICON.prev}</button>
+    <button class="pbtn play" data-act="toggle" title="${t("pause")}">${ICON.pause}</button>
+    <button class="pbtn" data-act="next" title="${t("nextGame")}">${ICON.next}</button>
   </div>
   <div class="drawer" data-drawer="search">
-    <div class="search-wrap">${ICON.search}<input class="search" type="text" placeholder="Search ${CATALOG.length.toLocaleString("en-US")} games…" spellcheck="false"></div>
-    <div class="results"></div>
+    <div class="card search-card">
+      <div class="card-head">${ICON.search}<h4>${t("chooseGame")}</h4></div>
+      <div class="search-wrap">${ICON.search}<input class="search" type="text" placeholder="${t("searchGames", { count: GAMES.length.toLocaleString(UI_LOCALE) })}" spellcheck="false"></div>
+      <div class="results"></div>
+    </div>
   </div>
   <div class="drawer" data-drawer="settings">
-    <div class="card">
-      <div class="card-head">${ICON.shuffle}<h4>Rotation</h4></div>
+    <div class="card rotation-card">
+      <div class="card-head"><h4>${t("rotation")}</h4></div>
       <div class="grid">
-        <label class="field"><span>Min</span><div class="input"><input id="gp-min" type="number" min="1" max="1440"><i>min</i></div></label>
-        <label class="field"><span>Max</span><div class="input"><input id="gp-max" type="number" min="1" max="1440"><i>min</i></div></label>
-        <label class="field"><span>Break</span><div class="input"><input id="gp-rest" type="number" min="1" max="10"><i>min</i></div></label>
+        <label class="field"><span>${t("min")}</span><div class="input"><input id="gp-min" type="number" min="60" max="86400" step="15"><i>${t("sec")}</i></div></label>
+        <label class="field"><span>${t("max")}</span><div class="input"><input id="gp-max" type="number" min="1" max="1440" step="0.25"><i>${t("minUnit")}</i></div></label>
+        <label class="field"><span>${t("break")}</span><div class="input"><input id="gp-rest" type="number" min="15" max="600" step="15"><i>${t("sec")}</i></div></label>
       </div>
-      <label class="switch">
-        <div><b>Credit playtime</b><small>Send each finished rotation session to Discord.</small></div>
-        <input id="gp-credit" type="checkbox"><span class="knob"></span>
-      </label>
-      <button class="btn apply" data-act="apply">Apply</button>
     </div>
-    <div class="card">
-      <div class="card-head">${ICON.bolt}<h4>Batch claim</h4><span class="tag">Instant</span></div>
+    <div class="card batch-card">
       <div class="grid">
-        <label class="field"><span>Hours / game</span><div class="input"><input id="gp-hours" type="number" min="0.1" max="9999" step="0.5"><i>h</i></div></label>
-        <label class="field"><span>Games</span><div class="input"><input id="gp-count" type="number" min="1" placeholder="All"></div></label>
-        <label class="field"><span>Per request</span><div class="input"><input id="gp-chunk" type="number" min="1" max="500"></div></label>
+        <label class="field"><span>${t("hoursPerGame")}</span><div class="input"><input id="gp-hours" type="number" min="0.1" max="9999" step="0.5"><i>h</i></div></label>
+        <label class="field"><span>${t("games")}</span><div class="input"><input id="gp-count" type="number" min="1" placeholder="${t("all")}"></div></label>
+        <label class="field"><span>${t("perRequest")}</span><div class="input"><input id="gp-chunk" type="number" min="1" max="500"></div></label>
       </div>
       <div class="summary">
-        <div class="stat"><b class="s-hours">–</b><span>Total hours</span></div>
-        <div class="stat"><b class="s-req">–</b><span>Requests</span></div>
-        <div class="stat"><b class="s-time">–</b><span>Est. time</span></div>
+        <div class="stat"><b class="s-hours">–</b><span>${t("totalHours")}</span></div>
+        <div class="stat"><b class="s-req">–</b><span>${t("requests")}</span></div>
+        <div class="stat"><b class="s-time">–</b><span>${t("estimatedTime")}</span></div>
       </div>
-      <div class="progress"><div class="track"><div class="pbar"></div></div><div class="progress-text"><span class="p-left"></span><span class="p-right"></span></div></div>
-      <button class="btn claim" data-act="claimAll">${ICON.bolt}<span class="claim-label">Claim all games</span></button>
+      <div class="progress" role="group" aria-label="${t("batchClaimProgress")}" aria-live="polite"><input id="gp-progress" class="progress-slider" type="range" min="0" max="100" step="0.1" value="0" disabled aria-label="${t("batchClaimProgress")}"><div class="progress-text"><span class="p-left"></span></div></div>
+      <button class="btn claim" data-act="claimAll"><span class="claim-label">${t("claim")}</span></button>
     </div>
   </div>
+  <div class="credit">Made by <span>@Zwuiix</span></div>
 </div>`;
 
         const $ = sel => shadow.querySelector(sel);
+        const modePicker = $(".mode-picker");
         const panel = $(".panel");
+        let selectedMode = null;
+        let resolveMode = null;
+        let modePromise;
+        const createModePromise = () => {
+            modePromise = new Promise(resolve => { resolveMode = resolve; });
+        };
+        createModePromise();
+        const selectMode = mode => {
+            if (selectedMode || !Object.values(MODES).includes(mode)) return;
+            selectedMode = mode;
+            modePicker.hidden = true;
+            resolveMode?.(mode);
+            resolveMode = null;
+        };
+        modePicker.querySelectorAll("[data-mode]").forEach(button => {
+            button.addEventListener("click", () => selectMode(button.dataset.mode));
+        });
         const els = {
-            count: $(".count"), icon: $(".icon"), title: $(".title"), sub: $(".sub"), bar: $(".bar"),
-            play: $(".play"), min: $("#gp-min"), max: $("#gp-max"), rest: $("#gp-rest"), credit: $("#gp-credit"),
+            count: $(".count"), headTitle: $(".head-title"), headSubtitle: $(".head-subtitle"),
+            icon: $(".icon"), title: $(".title"), sub: $(".sub"), bar: $(".bar"),
+            play: $(".play"), min: $("#gp-min"), max: $("#gp-max"), rest: $("#gp-rest"),
             search: $(".search"), results: $(".results"),
             hours: $("#gp-hours"), gameCount: $("#gp-count"), chunk: $("#gp-chunk"),
             claim: $(".claim"), claimLabel: $(".claim-label"),
             sHours: $(".s-hours"), sReq: $(".s-req"), sTime: $(".s-time"),
-            progress: $(".progress"), pbar: $(".pbar"), pLeft: $(".p-left"), pRight: $(".p-right")
+            progress: $(".progress"), progressSlider: $("#gp-progress"), pLeft: $(".p-left")
         };
         const fmt = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 1 });
         let claimRun = null;
+        let backHandler = null;
 
         const placeAtCorner = corner => {
             const [v, h] = corner.split("-");
@@ -2877,40 +2609,66 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             host.style[h] = "24px";
         };
         placeAtCorner(settings.corner);
-        if (settings.minimized) host.classList.add("minimized");
 
         let drag = null;
-        $(".head").addEventListener("pointerdown", e => {
-            if (e.target.closest("button")) return;
+        let suppressMiniClick = false;
+        let dragFrame = 0;
+        const applyDragPosition = (x, y) => Object.assign(host.style, {
+            left: `${clamp(x, 8, innerWidth - host.offsetWidth - 8)}px`,
+            top: `${clamp(y, 8, innerHeight - host.offsetHeight - 8)}px`,
+            right: "", bottom: ""
+        });
+        const startDrag = e => {
+            if (e.currentTarget === $(".head") && e.target.closest("button")) return;
             const r = host.getBoundingClientRect();
-            drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+            drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, x: r.left, y: r.top,
+                startX: e.clientX, startY: e.clientY, moved: false, source: e.currentTarget };
             panel.classList.add("dragging");
             e.currentTarget.setPointerCapture(e.pointerId);
-        });
-        $(".head").addEventListener("pointermove", e => {
+        };
+        const moveDrag = e => {
             if (!drag) return;
-            Object.assign(host.style, {
-                left: `${clamp(e.clientX - drag.dx, 8, innerWidth - host.offsetWidth - 8)}px`,
-                top: `${clamp(e.clientY - drag.dy, 8, innerHeight - host.offsetHeight - 8)}px`,
-                right: "", bottom: ""
-            });
-        });
+            if (Math.abs(e.clientX - drag.startX) > 4 || Math.abs(e.clientY - drag.startY) > 4) {
+                drag.moved = true;
+            }
+            drag.x = e.clientX - drag.dx;
+            drag.y = e.clientY - drag.dy;
+            if (!dragFrame) {
+                dragFrame = requestAnimationFrame(() => {
+                    dragFrame = 0;
+                    if (drag) applyDragPosition(drag.x, drag.y);
+                });
+            }
+        };
         const endDrag = e => {
             if (!drag) return;
+            const moved = drag.moved;
+            const source = drag.source;
+            if (Number.isFinite(e.clientX) && Number.isFinite(e.clientY)) {
+                drag.x = e.clientX - drag.dx;
+                drag.y = e.clientY - drag.dy;
+            }
+            if (dragFrame) cancelAnimationFrame(dragFrame);
+            dragFrame = 0;
+            applyDragPosition(drag.x, drag.y);
             drag = null;
             panel.classList.remove("dragging");
             const r = host.getBoundingClientRect();
             const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
             settings.corner = `${cy < innerHeight / 2 ? "top" : "bottom"}-${cx < innerWidth / 2 ? "left" : "right"}`;
             save();
-            placeAtCorner(settings.corner);
+            if (e.type === "pointerup" && source === $(".mini") && moved) suppressMiniClick = true;
         };
-        $(".head").addEventListener("pointerup", endDrag);
-        $(".head").addEventListener("pointercancel", endDrag);
+        for (const target of [$(".head"), $(".mini")]) {
+            target.addEventListener("pointerdown", startDrag);
+            target.addEventListener("pointermove", moveDrag);
+            target.addEventListener("pointerup", endDrag);
+            target.addEventListener("pointercancel", endDrag);
+        }
 
         const batchInputs = () => ({
             hours: clamp(Number(els.hours.value) || DEFAULTS.batchHours, 0.1, 9999),
-            count: clamp(Math.floor(Number(els.gameCount.value)) || CATALOG.length, 1, CATALOG.length),
+            count: clamp(Math.floor(Number(els.gameCount.value)) || GAMES.length, 1, GAMES.length),
             chunk: clamp(Math.floor(Number(els.chunk.value)) || DEFAULTS.batchChunk, 1, 500)
         });
         const updateSummary = () => {
@@ -2919,8 +2677,10 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             const seconds = requests * (BATCH_DELAY_MS / 1000 + 0.4);
             els.sHours.textContent = fmt(Math.round(hours * count));
             els.sReq.textContent = fmt(requests);
-            els.sTime.textContent = seconds < 60 ? `${Math.ceil(seconds)}s` : `${Math.ceil(seconds / 60)} min`;
-            if (!claimRun) els.claimLabel.textContent = count >= CATALOG.length ? "Claim all games" : `Claim ${fmt(count)} games`;
+            els.sTime.textContent = seconds < 60
+                ? t("seconds", { count: Math.ceil(seconds) })
+                : t("minutes", { count: Math.ceil(seconds / 60) });
+            if (!claimRun) els.claimLabel.textContent = t("claim");
         };
         const saveBatchInputs = () => {
             const { hours, chunk } = batchInputs();
@@ -2937,16 +2697,16 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             }
             const openName = shadow.querySelector(".drawer.open")?.dataset.drawer;
             for (const b of shadow.querySelectorAll(".tool[data-act]")) b.classList.toggle("on", b.dataset.act === openName);
+            $(".tool.back").classList.toggle("visible", Boolean(openName));
             if ($(`.drawer[data-drawer="search"]`).classList.contains("open")) {
                 els.search.value = "";
                 renderResults("");
                 els.search.focus();
             }
             if ($(`.drawer[data-drawer="settings"]`).classList.contains("open")) {
-                els.min.value = settings.minMinutes;
+                els.min.value = Math.round(settings.minMinutes * 60);
                 els.max.value = settings.maxMinutes;
-                els.rest.value = settings.restMinutes;
-                els.credit.checked = settings.creditPlaytime;
+                els.rest.value = Math.round(settings.restMinutes * 60);
                 els.hours.value = settings.batchHours;
                 els.gameCount.value = settings.batchCount || "";
                 els.chunk.value = settings.batchChunk;
@@ -2956,6 +2716,29 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         const closeDrawers = () => {
             shadow.querySelectorAll(".drawer").forEach(d => d.classList.remove("open"));
             shadow.querySelectorAll(".tool.on").forEach(b => b.classList.remove("on"));
+            $(".tool.back").classList.remove("visible");
+        };
+
+        const showModePicker = () => {
+            if (claimRun) {
+                claimRun.cancelled = true;
+                claimRun = null;
+            }
+            closeDrawers();
+            modePicker.hidden = false;
+            panel.classList.remove("instant", "live");
+            panel.classList.add("mode-selecting");
+            $(".tool.back").classList.remove("visible");
+            els.headTitle.textContent = t("chooseMode");
+            els.headSubtitle.textContent = t("chooseModeSubtitle");
+            els.count.textContent = t("chooseModeBadge");
+            els.claim.classList.remove("running", "done", "failed");
+            els.claimLabel.textContent = t("claim");
+            els.progress.classList.remove("show");
+            els.progressSlider.value = "0";
+            els.progressSlider.style.setProperty("--progress", "0%");
+            selectedMode = null;
+            if (!resolveMode) createModePromise();
         };
 
         const renderResults = query => {
@@ -2964,19 +2747,21 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             els.results.replaceChildren(...(hits.length ? hits.map(i => {
                 const b = document.createElement("button");
                 b.className = "result";
-                b.textContent = CATALOG[i][0];
+                b.textContent = GAMES[i][0];
                 b.onclick = () => { closeDrawers(); playIndex(i); };
                 return b;
             }) : [Object.assign(document.createElement("div"), {
-                className: "empty", textContent: q ? "No games found." : "Type a game name."
+                className: "empty", textContent: q ? t("noGames") : t("typeGameName")
             })]));
         };
         els.search.addEventListener("input", () => renderResults(els.search.value));
-        els.credit.addEventListener("change", () => {
-            settings.creditPlaytime = els.credit.checked;
-            save();
-        });
         for (const input of [els.hours, els.gameCount, els.chunk]) input.addEventListener("input", saveBatchInputs);
+        const applyRotationInputs = () => setIntervals(
+            Number(els.min.value) / 60,
+            Number(els.max.value),
+            Number(els.rest.value) / 60
+        );
+        for (const input of [els.min, els.max, els.rest]) input.addEventListener("change", applyRotationInputs);
         for (const input of [els.search, els.min, els.max, els.rest, els.hours, els.gameCount, els.chunk]) {
             for (const type of ["keydown", "keyup", "keypress"]) {
                 input.addEventListener(type, e => e.stopPropagation());
@@ -2986,39 +2771,38 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             if (e.key === "Enter") els.results.querySelector(".result")?.click();
             if (e.key === "Escape") closeDrawers();
         });
-        for (const input of [els.min, els.max, els.rest]) {
-            input.addEventListener("keydown", e => {
-                if (e.key === "Enter") actions.apply();
-            });
-        }
-
         const actions = {
             prev: () => go(-1),
             next: () => go(1),
             toggle: togglePause,
             stop,
+            back: () => {
+                const searchOpen = shadow.querySelector('.drawer[data-drawer="search"]')?.classList.contains("open");
+                if (searchOpen) {
+                    closeDrawers();
+                    return;
+                }
+                backHandler?.();
+            },
             search: () => toggleDrawer("search"),
             settings: () => toggleDrawer("settings"),
             minimize: () => { host.classList.add("minimized"); settings.minimized = true; save(); },
-            apply: () => {
-                setIntervals(Number(els.min.value), Number(els.max.value), Number(els.rest.value));
-                closeDrawers();
-            },
             claimAll: () => {
                 if (claimRun) {
                     claimRun.cancelled = true;
-                    els.claimLabel.textContent = "Stopping…";
+                    els.claimLabel.textContent = t("stopping");
                     return;
                 }
                 const { hours, count, chunk } = batchInputs();
                 const run = claimRun = { cancelled: false };
                 const showProgress = (done, total) => {
-                    const pct = total ? Math.floor((done / total) * 100) : 0;
-                    els.pbar.style.width = `${pct}%`;
-                    els.pLeft.textContent = `${fmt(done)} / ${fmt(total)} games`;
-                    els.pRight.textContent = `${pct}%`;
+                    const pct = total ? Math.min(100, (done / total) * 100) : 0;
+                    els.progressSlider.value = pct.toFixed(1);
+                    els.progressSlider.style.setProperty("--progress", `${pct}%`);
+                    els.pLeft.textContent = `${fmt(done)} / ${fmt(total)} ${t("games")}`;
                 };
                 const finish = (state, label) => {
+                    if (claimRun !== run) return;
                     claimRun = null;
                     els.claim.classList.remove("running");
                     els.claim.classList.add(state);
@@ -3032,14 +2816,17 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                 };
                 els.claim.classList.remove("done", "failed");
                 els.claim.classList.add("running");
-                els.claimLabel.textContent = "Claiming… click to stop";
+                els.claimLabel.textContent = t("claiming");
                 els.progress.classList.add("show");
                 showProgress(0, count);
                 batchClaimAll(hours, count, chunk, showProgress, run)
-                    .then(n => finish("done", run.cancelled ? `Stopped · ${fmt(n)} games` : `Done · ${fmt(n)} games`))
+                    .then(n => finish("done", run.cancelled
+                        ? t("stopped", { count: fmt(n) })
+                        : t("done", { count: fmt(n) })))
                     .catch(error => {
                         console.error("[Game Presence] Batch claim failed:", error);
-                        finish("failed", `Failed${error?.status ? ` · ${error.status}` : ""} · see console`);
+                        const status = error?.status ? ` · ${error.status}` : "";
+                        finish("failed", t("failed", { status }));
                     });
             }
         };
@@ -3047,15 +2834,55 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             const btn = e.target.closest("[data-act]");
             if (btn) actions[btn.dataset.act]?.();
         });
-        $(".mini").addEventListener("click", () => { host.classList.remove("minimized"); settings.minimized = false; save(); });
+        $(".mini").addEventListener("click", () => {
+            if (suppressMiniClick) {
+                suppressMiniClick = false;
+                return;
+            }
+            host.classList.remove("minimized");
+            settings.minimized = false;
+            save();
+        });
 
         document.body.appendChild(host);
 
         let renderToken = 0;
         return {
+            waitForMode: () => modePromise,
+            setBackHandler(handler) {
+                backHandler = handler;
+            },
+            showModePicker,
+            setMode(mode) {
+                createModePromise();
+                host.classList.remove("minimized");
+                settings.minimized = false;
+                save();
+                modePicker.hidden = true;
+                panel.classList.remove("mode-selecting");
+                panel.classList.toggle("instant", mode === MODES.INSTANT);
+                panel.classList.toggle("live", mode === MODES.LIVE);
+                els.title.style.opacity = "1";
+                if (mode === MODES.INSTANT) {
+                    els.headTitle.textContent = t("batchClaim");
+                    els.headSubtitle.textContent = t("batchSubtitle");
+                    els.count.textContent = t("instantBadge");
+                    els.title.textContent = t("readyToClaim");
+                    els.sub.textContent = t("configureBatch");
+                    els.bar.style.width = "0%";
+                    toggleDrawer("settings");
+                } else {
+                    els.headTitle.textContent = t("liveRichPresence");
+                    els.headSubtitle.textContent = t("liveDescription");
+                    els.count.textContent = t("liveBadge");
+                    toggleDrawer("settings");
+                    els.title.textContent = t("starting");
+                    els.sub.textContent = t("preparingRotation");
+                }
+            },
             showGame([name, applicationId], idx, total) {
                 const token = ++renderToken;
-                els.count.textContent = `Playing · ${idx + 1}/${total}`;
+                els.count.textContent = t("playing", { current: idx + 1, total });
                 els.title.style.opacity = "0";
                 panel.classList.add("pulse");
                 setTimeout(() => {
@@ -3079,64 +2906,77 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
                     const left = Math.max(0, breakEndsAt - Date.now());
                     const s = Math.floor(left / 1000);
                     const m = Math.floor(s / 60), sec = s % 60;
-                    els.count.textContent = "Resting";
-                    els.sub.textContent = `Next game in ${m}m ${String(sec).padStart(2, "0")}s`;
+                    els.count.textContent = t("resting");
+                    els.sub.textContent = t("nextGameIn", {
+                        time: `${m}m ${String(sec).padStart(2, "0")}s`
+                    });
                     els.bar.style.width = `${(((settings.restMinutes * 60_000 - left) / (settings.restMinutes * 60_000)) * 100).toFixed(1)}%`;
                     return;
                 }
                 if (!nextSwitchAt) {
-                    if (!current) els.count.textContent = "Paused";
-                    els.sub.textContent = "Rotation paused";
+                    if (!current) els.count.textContent = t("paused");
+                    els.sub.textContent = t("rotationPaused");
                     els.bar.style.width = "0%";
                     return;
                 }
                 const left = Math.max(0, nextSwitchAt - Date.now());
                 const s = Math.floor(left / 1000);
                 const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-                els.sub.textContent = `Next game in ${h ? `${h}h ` : ""}${m}m ${String(sec).padStart(2, "0")}s`;
+                els.sub.textContent = t("nextGameIn", {
+                    time: `${h ? `${h}h ` : ""}${m}m ${String(sec).padStart(2, "0")}s`
+                });
                 els.bar.style.width = `${(((switchDuration - left) / switchDuration) * 100).toFixed(1)}%`;
             },
             setPaused(paused) {
                 panel.classList.toggle("paused", paused);
                 els.play.innerHTML = paused ? ICON.play : ICON.pause;
-                els.play.title = paused ? "Resume rotation" : "Pause rotation";
+                els.play.title = paused ? t("resumeRotation") : t("pauseRotation");
             },
             destroy() {
                 if (claimRun) claimRun.cancelled = true;
+                resolveMode?.(null);
+                resolveMode = null;
                 host.remove();
             }
         };
     })();
 
-    window[LOCK] = {
-        stop,
-        next: () => go(1),
-        previous: () => go(-1),
-        togglePause,
-        play: name => {
-            const q = normalize(name ?? "");
-            const i = q ? searchGames(q)[0] : undefined;
-            if (i === undefined) return console.warn(`[Game Presence] Game not found: ${name}`);
-            playIndex(i);
-        },
-        setIntervals,
-        batchClaim: (hours = settings.batchHours, count = null, perRequest = settings.batchChunk) =>
-            batchClaimAll(hours, count, perRequest),
-        get current() { return current?.name ?? null; },
-        get games() { return CATALOG.map(([n]) => n); }
+    loadingLock.stop = () => {
+        cancelledWhileLoading = true;
+        ui.destroy();
     };
-
-    window.addEventListener("pagehide", stop, { once: true });
-    try {
-        installNativeShim();
-        patchStore();
-        activate();
-        schedule();
-        tickTimer = setInterval(() => ui.tick(), 1000);
-    } catch (error) {
-        stop();
-        throw error;
+    ui.setBackHandler(() => {
+        resetRuntime();
+        ui.showModePicker();
+    });
+    let requestedMode = await ui.waitForMode();
+    if (!requestedMode || cancelledWhileLoading || window[LOCK] !== loadingLock) {
+        if (window[LOCK] === loadingLock) delete window[LOCK];
+        return;
     }
 
-    console.log(`[Game Presence] ${CATALOG.length} games loaded. Commands: window.__gamePresence.next() / .play("Minecraft") / .batchClaim(hours, count, perRequest) / .stop()`);
+    const runtimeLock = { stop };
+    window[LOCK] = runtimeLock;
+
+    window.addEventListener("pagehide", stop, { once: true });
+    while (requestedMode && !stopped && window[LOCK] === runtimeLock) {
+        selectedMode = requestedMode;
+        ui.setMode(selectedMode);
+        try {
+            if (selectedMode === MODES.LIVE) {
+                runtimeInstalled = true;
+                installNativeShim();
+                patchStore();
+                activate();
+                schedule();
+                tickTimer = setInterval(() => ui.tick(), 1000);
+            }
+        } catch (error) {
+            stop();
+            throw error;
+        }
+        requestedMode = await ui.waitForMode();
+    }
+    if (!stopped && window[LOCK] === runtimeLock) stop();
+
 })();

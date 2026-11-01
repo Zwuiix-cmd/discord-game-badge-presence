@@ -1,123 +1,209 @@
 # Discord Game Presence
 
-An unofficial Discord desktop presence experiment forked from [everyoneexe/discord-game-badge-presence](https://github.com/everyoneexe/discord-game-badge-presence). This fork is maintained as `game-presence.js`.
+An unofficial Discord Desktop userscript that displays game activity through a small, draggable overlay.
 
-The current fork-specific interface, game rotation, playback controls, configuration work were created and integrated with assistance from OpenAI Codex. The upstream project remains credited for the original foundation.
+Made by **@Zwuiix**.
 
-## Important educational disclaimer
+## Important notice
 
-**This project is provided strictly for education, research, and experimentation. We do not endorse, encourage, or condone using it to manipulate Discord badges, activity history, account metrics, or any platform feature.**
+This project is for education, research, and experimentation only.
 
-This is not an official Discord feature or API. It modifies undocumented in-memory Discord client internals and may violate Discord's Terms of Service. Running it can cause activity removal, badge loss, client instability, warnings, suspension, or permanent account termination. It is not guaranteed to be safe, undetectable, or compatible with any account.
+It interacts with undocumented Discord Desktop modules and internal endpoints. It is not an official Discord feature or API and may violate Discord's Terms of Service. Discord can remove the activity, change its internal modules, restrict the account, or take other action at any time.
 
-Use it only where you accept those risks. The authors and contributors are not responsible for bans, suspensions, lost data, purchases, progress, or any other consequence. By using, modifying, or distributing this project, you accept full responsibility for your actions.
-
-## Fork attribution
-
-This repository is a modified continuation of [everyoneexe/discord-game-badge-presence](https://github.com/everyoneexe/discord-game-badge-presence). Please consult the upstream project for its original context and licensing information.
+There is no guarantee that the script is safe, undetectable, compatible with every Discord version, or able to unlock any badge or account progression. Use it only on an account and installation where you accept those risks. The project is provided as-is, without warranties.
 
 ## Features
 
-- Main script: `game-presence.js` (~120 KB, down from ~980 KB).
-- Live catalogue loaded from Discord's `detectables/games.json`, with the embedded 1 846-game catalogue used as fallback.
-- Large shuffled catalogue of popular games, including Minecraft, Fortnite, Roblox, CS:GO, GTA, Valorant, League of Legends, and many more.
-- Official game icons loaded from Discord's own CDN (`/applications/{id}/rpc`), with an emoji fallback.
-- Search panel to pick any game directly (ignores accents and punctuation).
-- Purple interface using `#7d54d9`, isolated in a Shadow DOM so its styles never leak into Discord.
-- Playback controls: previous, pause/resume, and next (wraps around the list).
-- Pause keeps the current game active indefinitely.
-- Default cycle: 20 minutes playing, followed by a 2-minute offline break.
-- Optional Discord analytics crediting for completed sessions, disabled by default.
-- Configurable minimum and maximum rotation intervals.
-- Drag the panel and snap it to any screen corner.
-- Pause state, minimized state, corner and intervals are remembered between runs.
-- Clean shutdown that restores patched store methods. Discord is only patched once the panel is ready.
+- Discord Desktop support only.
+- A compact dark-purple overlay isolated inside a Shadow DOM.
+- Two operating modes:
+  - **Instant Claim** — credits playtime for several games in batches.
+  - **Live Rich Presence** — rotates synthetic game activity like a normal session.
+- Games are fetched at runtime from Discord's public detectable-games endpoint:
+  https://cdn.discordapp.com/detectables/games.json
+- No embedded game catalogue is required.
+- Search through the fetched games and display their Discord application icons.
+- Real batch progress slider showing completed games.
+- Previous, pause/resume, and next controls for live rotation.
+- Draggable header and draggable minimized button with corner snapping.
+- Settings are saved locally between runs.
+- The interface follows Discord's configured language when available, with English as the fallback.
+- The script checks for the Kodiak Discord community and waits for membership confirmation before starting.
 
 ## Requirements
 
-- Discord desktop, not Discord Web.
-- Access to the Discord developer console.
-- A Discord version exposing the required internal Webpack modules.
+- Discord Desktop, not Discord Web.
+- Access to the Discord Developer Tools console.
+- A Discord version exposing the internal Webpack modules used by the script.
+- Network access to Discord's CDN and internal endpoints.
 
-Discord can change these undocumented internals at any time. Compatibility is not guaranteed for Discord updates, Vencord, Flatpak, Snap, or other modified clients.
+Discord can change these undocumented internals without notice. Compatibility with modified clients, Vencord, Flatpak, Snap, and future Discord updates is not guaranteed.
+
+## Enable the Discord Desktop console
+
+The script must be executed in the **Developer Tools console of the Discord Desktop application**. Do not use:
+
+- Chrome, Edge, or Firefox's normal browser console;
+- Discord Web;
+- the console of a Discord website tab.
+
+Those environments do not expose the internal Desktop modules required by the script.
+
+### 1. Close Discord completely
+
+Quit Discord from the system tray before editing its settings file. If Discord is still running, it can overwrite your changes when it closes.
+
+It is a good idea to make a backup copy of the settings file before editing it.
+
+### 2. Open Discord's settings.json
+
+Use the path matching the Discord build you actually use:
+
+| Platform | Stable | PTB | Canary |
+| --- | --- | --- | --- |
+| Windows | %APPDATA%\discord\settings.json | %APPDATA%\discordptb\settings.json | %APPDATA%\discordcanary\settings.json |
+| macOS | ~/Library/Application Support/discord/settings.json | ~/Library/Application Support/discordptb/settings.json | ~/Library/Application Support/discordcanary/settings.json |
+| Linux | ~/.config/discord/settings.json | ~/.config/discordptb/settings.json | ~/.config/discordcanary/settings.json |
+
+On Windows, press **Win + R** and enter:
+
+~~~text
+%APPDATA%\discord\settings.json
+~~~
+
+If Windows asks which application should open the file, use Notepad or another plain-text editor. Do not use Word or a rich-text editor.
+
+### 3. Enable Chromium DevTools
+
+Add this property at the root of settings.json:
+
+~~~json
+{
+  "DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING": true
+}
+~~~
+
+If the file already contains settings, keep the existing properties and add a comma before the new property. For example:
+
+~~~json
+{
+  "IS_MAXIMIZED": false,
+  "DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING": true
+}
+~~~
+
+The long property name is intentional. It is Discord's explicit warning that enabling Chromium DevTools exposes a powerful inspection and execution console inside the client. This is not the normal **Developer Mode** switch in Discord's user settings; it enables the actual Desktop application's DevTools.
+
+Save the file, then start Discord again. If DevTools still does not open, quit every Discord process and launch the same Discord build whose settings file you edited.
+
+### 4. Open the Desktop console
+
+With Discord Desktop focused, use:
+
+- **Windows/Linux:** Ctrl + Shift + I
+- **macOS:** Command + Option + I
+
+Select the **Console** tab. You should see a console belonging to the Discord Desktop application, not a browser tab.
+
+### 5. Understand the “Allow pasting” warning
+
+Chromium may block pasting into the console and show a self-XSS warning. This is a safety feature because pasting unknown code into a privileged console can expose your Discord account or let someone modify the client.
+
+If you have reviewed the source and understand what you are running:
+
+1. Click inside the Discord console.
+2. Type **allow pasting** manually with your keyboard.
+3. Press Enter.
+4. Paste the complete contents of game-presence.js.
+5. Press Enter to execute it.
+
+Do not paste the words **allow pasting** from another application; the point of the warning is to make sure you intentionally acknowledge it. This command only unlocks pasting for the console and does not make the script safe by itself.
+
+To disable Desktop DevTools later, close Discord and remove the property or change its value to false, then restart Discord.
 
 ## Quick start
 
-1. Open Discord desktop.
-2. Open the developer console.
-3. Open `game-presence.js`.
-4. Copy and execute the complete file in the console.
-5. Use the popup controls to navigate, pause, resume, or change intervals.
+1. Complete the **Enable the Discord Desktop console** steps above.
+2. Open the file game-presence.js.
+3. Copy and execute the complete file in the **Discord Desktop Console**.
+4. Choose **Instant Claim** or **Live Rich Presence** in the overlay.
 
-Run only one copy at a time. To stop an existing instance:
+The script stops with a centered warning when it is executed in a normal browser. Run only one instance at a time.
 
-```js
+To stop the active instance manually:
+
+~~~js
 window.__gamePresence.stop()
-```
+~~~
 
-## Controls
+## Instant Claim
 
-- `⏮ Previous`: go to the previous game (wraps to the end of the list).
-- `⏸ Pause`: keep the current game active forever and stop the rotation timer.
-- `▶ Play`: resume automatic rotation.
-- `⏭ Next`: advance to the next game.
-- `🔍 Search`: type a game name, press Enter or click a result to play it.
-- `⚙ Settings`: change the minimum and maximum interval and the offline break (in minutes).
-- In `⚙ Settings`, enable `Credit playtime to Discord analytics` to submit completed sessions to Discord's `/science` endpoint.
-- `_ Minimize`: collapse the panel into a small round button.
-- Drag the header: move the panel and snap it to one of four corners.
-- `✕ Stop`: restore Discord's original in-memory store methods and remove the synthetic activity.
+Instant Claim is the batch mode.
 
-## Console commands
+Default values:
 
-```js
-window.__gamePresence.next()
-window.__gamePresence.previous()
-window.__gamePresence.play("minecraft")
-window.__gamePresence.togglePause()
-window.__gamePresence.setIntervals(20, 20, 2)
-window.__gamePresence.current
-window.__gamePresence.games
-window.__gamePresence.stop()
-```
+- **Hours / game:** 1
+- **Games:** all fetched games
+- **Per request:** 16
+
+The progress slider advances as each game is processed. The button can be clicked again to stop the current batch. Completed sessions are sent through Discord's own analytics flow; this does not guarantee badge progression.
+
+## Live Rich Presence
+
+Live Rich Presence continuously rotates the selected games and displays one synthetic activity at a time.
+
+Default timing:
+
+- **Minimum:** 60 seconds
+- **Maximum:** 5 minutes
+- **Break:** 15 seconds
+
+The timing fields apply automatically when changed. The mode also supports searching for a game, selecting the previous or next game, pausing the rotation, minimizing the overlay, and dragging it to another position.
+
+## Discord community check
+
+Before the interface starts, the script checks whether the account belongs to the Kodiak Discord community. If it does not, it attempts to accept the configured invite and polls Discord until membership is confirmed.
+
+If Discord does not confirm membership, the script stops instead of starting the activity.
 
 ## How it works
 
-The script loads Discord's detectable-game catalogue at startup, filters valid game IDs and Windows executables, and falls back to the embedded catalogue if the download fails. It then locates Discord's Webpack module registry, resolves `RunningGameStore` and the Flux dispatcher, and injects one synthetic running-game record. It patches the store's running, visible, seen, verified-ID, and analytics accessors, then dispatches debug and local game-state events while changing the displayed game according to the playback state. The activity is re-announced periodically so Discord's client-side tracking does not immediately drop it. Each activity includes the catalogue entry's public application ID and executable path.
+The script:
 
-When analytics crediting is enabled, completed sessions are submitted to Discord's own `/science` endpoint using the same launch and heartbeat event shape as the desktop client. The option is off by default and does not guarantee badge progression.
+1. Loads and validates Discord's detectable-game list.
+2. Resolves the required Discord Webpack modules from the running Desktop client.
+3. Resolves the configured Discord locale for the interface.
+4. Creates the isolated overlay and waits for a mode selection.
+5. Patches the relevant in-memory activity stores only while the script is running.
+6. Dispatches activity updates as the selected game changes.
+7. Restores the original store methods and removes the synthetic activity when stopped.
 
-It does not launch games, modify Steam playtime, attach to game processes, access Discord tokens, read passwords, or send project telemetry to an external server. Synthetic executable paths are metadata only.
-
-## Catalogue data and Rich Presence
-
-The embedded catalogue only keeps the fields the script actually uses:
-
-- the game name;
-- `discord_application_id`: the public Discord application ID associated with the game;
-
-The source catalogue is [this public list](https://gist.github.com/1271/cf4b6a3b562532988fa5b0688102b2cc). The local Rich Presence payload sends the game name, type, timestamps, and matching `application_id`.
-
-## Limitations
-
-- Discord displays one primary activity, not every game simultaneously.
-- Badge progression and account recognition are not guaranteed.
-- Discord restarts and reloads clear the in-memory changes.
-- Game icons come from Discord's public application endpoint; if it fails, an emoji is shown instead.
-- Discord may change internal modules without notice.
-
-## Troubleshooting
-
-If the activity is not visible, verify that Discord activity status is enabled, only one script copy is running, and the developer console shows no error. Stop the script and restart Discord before retrying.
-
-If the Webpack registry or game store cannot be found, the current Discord build may not expose the expected undocumented modules.
+The script does not launch games, modify Steam playtime, read passwords, or send project telemetry to an external service.
 
 ## Privacy
 
-The script does not intentionally collect or transmit raw tokens, passwords, or session storage. With analytics crediting enabled, it sends completed game-session events to Discord itself; with it disabled, it does not send those analytics events. Always inspect the source before running code in a privileged application console.
+The script uses Discord's own client context and endpoints. The game list is fetched from Discord's CDN, and icons are requested from Discord's public application resources. Instant Claim uses Discord's analytics endpoint for the requested session events.
+
+The source does not intentionally collect or transmit raw tokens, passwords, or unrelated account data. Always inspect the source before executing code inside a privileged application console.
+
+## Troubleshooting
+
+### The Desktop warning appears
+
+The script was executed in a browser or in a client that does not expose Discord's required Desktop modules. Execute it from Discord Desktop's Developer Tools.
+
+### The game list cannot be loaded
+
+Check that Discord's CDN is reachable and that the console does not show a network or response-format error. Discord may also have changed the detectable-games endpoint.
+
+### Kodiak membership cannot be confirmed
+
+Check the account's server access and wait for Discord to finish processing the invite. The script will not start the activity until membership is confirmed.
+
+### The activity disappears
+
+Discord reloads and client updates clear in-memory changes. Stop the script, restart Discord if necessary, and execute the current file again.
 
 ## License and trademarks
 
-This project is independent and is not affiliated with, endorsed by, or sponsored by Discord, Valve, Steam, Vencord, or any referenced game publisher. Discord and all game names and logos are trademarks of their respective owners.
-
-This project is provided **AS IS**, without warranties or guarantees. The educational disclaimer above applies to all use of this repository.
+This project is independent and is not affiliated with, endorsed by, or sponsored by Discord, Kodiak, Valve, Steam, Vencord, or any game publisher. Discord and all game names, icons, and logos are trademarks of their respective owners.
