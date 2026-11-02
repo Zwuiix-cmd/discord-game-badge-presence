@@ -1675,6 +1675,11 @@ input:focus { border-color:var(--accent) !important; box-shadow:0 0 0 2px var(--
             }
         };
         for (const input of [els.hours, els.gameCount, els.chunk]) input.addEventListener("input", saveBatchInputs);
+        for (const input of [els.hours, els.gameCount, els.chunk]) {
+            for (const type of ["keydown", "keyup", "keypress"]) {
+                input.addEventListener(type, e => e.stopPropagation());
+            }
+        }
         const actions = {
             stop,
             settings: () => toggleDrawer("settings"),
