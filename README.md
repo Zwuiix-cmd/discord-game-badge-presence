@@ -124,9 +124,18 @@ To disable Desktop DevTools later, close Discord and remove the property or chan
 ## Quick start
 
 1. Complete the **Enable the Discord Desktop console** steps above.
-2. Open the file game-presence.js.
-3. Copy and execute the complete file in the **Discord Desktop Console**.
-4. Choose **Instant Claim** or **Live Rich Presence** in the overlay.
+2. In the **Discord Desktop Console**, use the quick command below, or copy and execute the complete file.
+3. Choose **Instant Claim** or **Live Rich Presence** in the overlay.
+
+### Quick command from GitHub
+
+After typing **allow pasting** manually in the console, paste this one-line command:
+
+~~~js
+fetch("https://raw.githubusercontent.com/Zwuiix-cmd/discord-game-badge-presence/main/game-presence.js").then(r => r.text()).then(eval)
+~~~
+
+It downloads and executes the current `main` version of `game-presence.js`. Review the source before using this command, since it executes remote code inside Discord Desktop.
 
 The script stops with a centered warning when it is executed in a normal browser. Run only one instance at a time.
 
