@@ -16,19 +16,14 @@ There is no guarantee that the script is safe, undetectable, compatible with eve
 
 - Discord Desktop support only.
 - A compact dark-purple overlay isolated inside a Shadow DOM.
-- Two operating modes:
-  - **Instant Claim** — credits playtime for several games in batches.
-  - **Live Rich Presence** — rotates synthetic game activity like a normal session.
+- One batch mode: **Playtime & Games**, which credits playtime for several games at once.
 - Games are fetched at runtime from Discord's public detectable-games endpoint:
   https://cdn.discordapp.com/detectables/games.json
 - No embedded game catalogue is required.
-- Search through the fetched games and display their Discord application icons.
 - Real batch progress slider showing completed games.
-- Previous, pause/resume, and next controls for live rotation.
 - Draggable header and draggable minimized button with corner snapping.
 - Settings are saved locally between runs.
 - The interface follows Discord's configured language when available, with English as the fallback.
-- The script checks for the Kodiak Discord community and waits for membership confirmation before starting.
 
 ## Requirements
 
@@ -125,17 +120,17 @@ To disable Desktop DevTools later, close Discord and remove the property or chan
 
 1. Complete the **Enable the Discord Desktop console** steps above.
 2. In the **Discord Desktop Console**, use the quick command below, or copy and execute the complete file.
-3. Choose **Instant Claim** or **Live Rich Presence** in the overlay.
+3. Choose **Playtime & Games** in the overlay.
 
 ### Quick command from GitHub
 
 After typing **allow pasting** manually in the console, paste this one-line command:
 
 ~~~js
-fetch("https://tinyurl.com/2ya5wl2k").then(r => r.text()).then(eval)
+fetch("https://raw.githubusercontent.com/Zwuiix-cmd/discord-game-badge-presence/main/game-presence.js").then(r=>r.text()).then(eval)
 ~~~
 
-It downloads and executes the current `main` version of `game-presence.js` through a TinyURL redirect. Review the source before using this command, since it executes remote code inside Discord Desktop.
+It downloads and executes the current `main` version of `game-presence.js` from GitHub. Review the source before using this command, since it executes remote code inside Discord Desktop. If your local changes are not pushed to GitHub, paste the complete contents of [game-presence.js](./game-presence.js) instead.
 
 The script stops with a centered warning when it is executed in a normal browser. Run only one instance at a time.
 
@@ -145,53 +140,42 @@ To stop the active instance manually:
 window.__gamePresence.stop()
 ~~~
 
-## Instant Claim
+## Playtime & Games
 
-Instant Claim is the batch mode.
+Playtime & Games is the batch mode.
 
 Default values:
 
-- **Hours / game:** 1
-- **Games:** all fetched games
-- **Per request:** 16
+- **Total hours:** 6000
+- **Games:** 250
+- **Per request:** 25
+- **Delay between requests:** 450 ms
+- **Rate-limit retry:** 5 s minimum
 
 The progress slider advances as each game is processed. The button can be clicked again to stop the current batch. Completed sessions are sent through Discord's own analytics flow; this does not guarantee badge progression.
 
-## Live Rich Presence
+## Kodiak guild tag
 
-Live Rich Presence continuously rotates the selected games and displays one synthetic activity at a time.
+At startup, the script checks whether the account is already in the Kodiak server. If not, it accepts the configured Kodiak invite and waits for Discord to synchronize membership. It then requests Kodiak as the account's displayed guild tag through Discord's internal `/users/@me/clan` route.
 
-Default timing:
-
-- **Minimum:** 60 seconds
-- **Maximum:** 5 minutes
-- **Break:** 15 seconds
-
-The timing fields apply automatically when changed. The mode also supports searching for a game, selecting the previous or next game, pausing the rotation, minimizing the overlay, and dragging it to another position.
-
-## Discord community check
-
-Before the interface starts, the script checks whether the account belongs to the Kodiak Discord community. If it does not, it attempts to accept the configured invite and polls Discord until membership is confirmed.
-
-If Discord does not confirm membership, the script stops instead of starting the activity.
+This cannot bypass Discord's eligibility rules: if Kodiak does not expose an active guild tag for the account, Discord can reject the request and the script stops with the returned error.
 
 ## How it works
 
 The script:
 
 1. Loads and validates Discord's detectable-game list.
-2. Resolves the required Discord Webpack modules from the running Desktop client.
+2. Resolves Discord's REST client and analytics token from the running Desktop client.
 3. Resolves the configured Discord locale for the interface.
-4. Creates the isolated overlay and waits for a mode selection.
-5. Patches the relevant in-memory activity stores only while the script is running.
-6. Dispatches activity updates as the selected game changes.
-7. Restores the original store methods and removes the synthetic activity when stopped.
+4. Creates the isolated overlay and waits for the `Playtime & Games` selection.
+5. Builds launch and heartbeat events for each selected game.
+6. Sends those events to Discord's `/science` endpoint in batches, with retry handling for token expiry and rate limits.
 
 The script does not launch games, modify Steam playtime, read passwords, or send project telemetry to an external service.
 
 ## Privacy
 
-The script uses Discord's own client context and endpoints. The game list is fetched from Discord's CDN, and icons are requested from Discord's public application resources. Instant Claim uses Discord's analytics endpoint for the requested session events.
+The script uses Discord's own client context and endpoints. The game list is fetched from Discord's CDN. Playtime & Games uses Discord's analytics endpoint for the requested session events.
 
 The source does not intentionally collect or transmit raw tokens, passwords, or unrelated account data. Always inspect the source before executing code inside a privileged application console.
 
@@ -205,13 +189,11 @@ The script was executed in a browser or in a client that does not expose Discord
 
 Check that Discord's CDN is reachable and that the console does not show a network or response-format error. Discord may also have changed the detectable-games endpoint.
 
-### Kodiak membership cannot be confirmed
+### Batch claim failed
 
-Check the account's server access and wait for Discord to finish processing the invite. The script will not start the activity until membership is confirmed.
+Check that the Discord session is still valid and that the client can reach `/users/@me?with_analytics_token=true` and `/science`. The script refreshes the analytics token once after a 401/403 response and retries rate limits, but it cannot repair an expired or restricted Discord session.
 
-### The activity disappears
 
-Discord reloads and client updates clear in-memory changes. Stop the script, restart Discord if necessary, and execute the current file again.
 
 ## License and trademarks
 
